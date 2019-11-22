@@ -31,7 +31,7 @@ public:
 	tray(
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 10.0, 10,  10, true, true)//PID
+		PIDcontroller(2.0, 0.0, 3.0, 10,  10, true, true, 30)//PID
 	),
 	intake(
 		{ Motor(INTAKE1), Motor(INTAKE2, true) }, //motors
@@ -51,7 +51,7 @@ public:
 	trayToggle(
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 10.0, 10,  10, true, true)//PID
+		PIDcontroller(2.0, 0.0, 1.0, 10,  10, true, true, 30)//PID
 	)
 	// base(//motors
 	// 	{ Motor(RFront), Motor(LFront), Motor(LBack), Motor(RBack) },

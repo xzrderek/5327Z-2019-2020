@@ -50,11 +50,11 @@ class vec3 {
 
 class PIDcontroller {
   public:
-  PIDcontroller(float p, float i, float d, float t, float dT, bool rev, bool run) :
+  PIDcontroller(float p, float i, float d, float t, float dT, bool rev, bool run, float r = 1.0) :
   kP(p), kI(i), kD(d), thresh(t), delayThresh(dT), isReversed(rev), isRunning(run),
-  LastError(0), Integral(0), Derivative(0), goal(0) {}
+  LastError(0), Integral(0), Derivative(0), goal(0), ratio(r) {}
   float kP, kI, kD;
-  float error;
+  float error, ratio;
   volatile bool isReversed, isRunning;
   float Integral, Derivative, LastError;
   volatile float thresh, delayThresh, goal;
@@ -84,7 +84,7 @@ class PIDcontroller {
       power += kD * Derivative;
       //final proportional output
       power += kP * error;
-      return dir * power;
+      return dir * power / ratio;
     }
     return 0;
   }

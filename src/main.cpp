@@ -31,8 +31,10 @@ void updatePIDs(void* param) {
     lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
-    lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
-    lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
+    //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
+    //lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
+    lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+
 
     // delay
     delay(delayAmnt);
@@ -192,11 +194,12 @@ void opcontrol() {
     } else if (pressedTray) {
         rob.tray.setPIDGoal(rob.tray.getSensorVal());
         rob.tray.setPIDState(ON);
+        rob.trayToggle.setPIDState(OFF);
         rob.intake.setPIDState(OFF);
         pressedTray = false;
     }
 
-    if(master.btnA){
+    if(master.btnA) {
       rob.tray.setPIDState(OFF);
       rob.intake.setPIDState(OFF);
       rob.trayToggle.moveToPID(3800);
