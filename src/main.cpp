@@ -14,6 +14,7 @@ ADIEncoder encoderL (1, 2, true), encoderR (3, 4, false), encoderM (5, 6, false)
 float encM, encL, encR;
 int baseLine;
 float LeftBAvg, RightBAvg;
+volatile int gSlow = 1;
 
 void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
@@ -23,6 +24,17 @@ void updatePIDs(void* param) {
     r->lift.PID();
     r->intake.PID();
     r->base.PID();
+
+    if(master.btnA) {
+      rob.tray.setPIDState(OFF);
+      rob.intake.setPIDState(OFF);
+      rob.trayToggle.moveToPID(3800);
+      //rob.intake.moveNew(20);
+      // rob.lift.moveNew(20);
+      // rob.tray.moveNew(20);
+
+      lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+    }
     //debug
     lcd::print(0, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
     lcd::print(1, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
@@ -31,13 +43,33 @@ void updatePIDs(void* param) {
     lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
+    lcd::print(7, (string("Slow: ") + std::to_string(gSlow)).c_str());
     //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
     //lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
-    lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
 
 
     // delay
     delay(delayAmnt);
+  }
+}
+
+void trayToggleFunc(void *param) {
+  Robot* r = (Robot*) param;
+  const float delayAmnt = 2;
+  while(true){
+    if(master.btnA) {
+      rob.tray.setPIDState(OFF);
+      rob.intake.setPIDState(OFF);
+      rob.trayToggle.moveToPID(3800);
+      //rob.intake.moveNew(20);
+      // rob.lift.moveNew(20);
+      // rob.tray.moveNew(20);
+
+      lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+
+      // delay
+      delay(delayAmnt);
+    }
   }
 }
 
@@ -155,17 +187,27 @@ void autonomous() {}
 void opcontrol() {
   bool brake = false;
 
-  Task sensorUpdates(updateSensor, &rob, "");
+  // Task sensorUpdates(updateSensor, &rob, "");
   // Task taskUpdate(updateTask, &rob, "");
   Task PIDsUpdate(updatePIDs, &rob, "");
+  // Task trayToggleTask(trayToggleFunc, &rob, "");
 //Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
   // rob.base.odom.resetEncoders = true;
 
-  bool pressedIntake, pressedTray, pressedLift, pressedBase;
+  bool pressedIntake = false, pressedTray = false, pressedLift = false;
+  bool pressedBase = false, pressedSlow = false;
 
   while (true) {
+    // slow
+    if (master.btnDOWN) {
+      pressedSlow = true;
+    } else if (pressedSlow == true) {
+      if (gSlow == 1) gSlow = 2;
+      else gSlow = 1;
+      pressedSlow = false;
+    }
     // intake
-    rob.intake.simpleControl(master.btnR2, master.btnR1);
+    rob.intake.simpleControl(master.btnR1, master.btnR2);
     if (master.btnR2 || master.btnR1) {
       rob.intake.setPIDState(OFF);
       pressedIntake = true;
@@ -197,15 +239,6 @@ void opcontrol() {
         rob.trayToggle.setPIDState(OFF);
         rob.intake.setPIDState(OFF);
         pressedTray = false;
-    }
-
-    if(master.btnA) {
-      rob.tray.setPIDState(OFF);
-      rob.intake.setPIDState(OFF);
-      rob.trayToggle.moveToPID(3800);
-      //rob.intake.moveNew(20);
-      // rob.lift.moveNew(20);
-      // rob.tray.moveNew(20);
     }
 
     // base

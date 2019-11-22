@@ -15,6 +15,7 @@ using namespace pros;
 
 extern ADIEncoder encoderL, encoderR, encoderM;
 extern float encM, encL, encR;
+extern volatile int gSlow;
 
 class Position {
   public:
@@ -124,15 +125,15 @@ class Mechanism{
   void move(float power){
     // setPIDState(OFF);
     for(const pros::Motor& m : mots){//for each motor in mots
-      m.move(power);
+      m.move(power / gSlow);
     }
   }
 
-  void movePID(float power){
-    for(const pros::Motor& m : mots){//for each motor in mots
-      m.move(power);
-    }
-  }
+  // void movePID(float power){
+  //   for(const pros::Motor& m : mots){//for each motor in mots
+  //     m.move(power);
+  //   }
+  // }
 
   void moveVel(float vel){
     setPIDState(OFF);
@@ -186,32 +187,32 @@ class Mechanism{
     mots[0].move(0);
     mots[1].move(75);
   }
-
-  int toggeru(int urMother){ // ask me what upDog is - Uday
-    if(urMother == 1){
-
-      if(upDog == 2){
-        move(127);
-        upDog = 0;
-        delay(300);
-        return 1;
-
-      }
-      if(upDog == 1){
-        move(-127);
-        upDog++;
-        delay(300);
-        return 1;
-      }
-      if(upDog == 0){
-        move(0);
-        upDog++;
-        delay(300);
-        return 1;
-      }
-
-    }
-  }
+  //
+  // int toggeru(int urMother){ // ask me what upDog is - Uday
+  //   if(urMother == 1){
+  //
+  //     if(upDog == 2){
+  //       move(127);
+  //       upDog = 0;
+  //       delay(300);
+  //       return 1;
+  //
+  //     }
+  //     if(upDog == 1){
+  //       move(-127);
+  //       upDog++;
+  //       delay(300);
+  //       return 1;
+  //     }
+  //     if(upDog == 0){
+  //       move(0);
+  //       upDog++;
+  //       delay(300);
+  //       return 1;
+  //     }
+  //
+  //   }
+  // }
 
   void moveAmnt(float amnt, float thresh, float power = 127){//simple encoder move
     float starting = getSensorVal();
@@ -235,7 +236,7 @@ class Mechanism{
   }
 
   void PID(){//does a PID move HAVE TO SET PID GOAL BEFOREHAND
-    if(pid.isRunning) movePID(pid.compute(getSensorVal()));
+    if(pid.isRunning) move(pid.compute(getSensorVal()));
     return;
   }
 
@@ -303,8 +304,8 @@ public:
     }
 
     void driveArcade(int powerFB, int powerLR) {
-      powerLR = clamp(63, -63, yeet(powerLR));
-      powerFB = clamp(127, -127, yeet(powerFB));
+      powerLR = clamp(50, -50, yeet(powerLR)) / gSlow;
+      powerFB = clamp(127, -127, yeet(powerFB)) / gSlow;
       mots[0].move(powerLR - powerFB); //port 4 right
       mots[1].move(powerLR + powerFB); //port 5 left
       mots[2].move(powerLR + powerFB); //port 6 left
