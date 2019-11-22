@@ -268,7 +268,7 @@ class Mechanism{
 
 class Chassis : public Mechanism {
 public:
-    Chassis(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) { 
+    Chassis(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
     }
 
     float yeet(float t){
@@ -284,15 +284,15 @@ public:
       mots[1].move(powerL);//port 5 left
       mots[2].move(powerL); //port 6 left
       mots[3].move(-powerR);//port 7  right
+    }
 
     void driveArcade(int powerFB, int powerLR) {
-      powerLR = clamp(127, -127, yeet(powerLR));
+      powerLR = clamp(63, -63, yeet(powerLR));
       powerFB = clamp(127, -127, yeet(powerFB));
       mots[0].move(powerLR - powerFB); //port 4 right
       mots[1].move(powerLR + powerFB); //port 5 left
       mots[2].move(powerLR + powerFB); //port 6 left
       mots[3].move(powerLR - powerFB); //port 7 right
-    }
     }
 
 };
@@ -327,7 +327,7 @@ class ChassisOld{
     int thing(int potVal, int potReq){
       return ((potVal - potReq));
     }
-    
+
     void driveLR(int powerR, int powerL){//low level
       powerL = clamp(127, -127, yeet(powerL));
       powerR = clamp(127, -127, yeet(powerR));
@@ -336,22 +336,22 @@ class ChassisOld{
       mots[2].move(powerL); //port 6 left
       mots[3].move(-powerR);//port 7  right
     }
-    
+
     // void brakeHecka(int potVal){//low level
     //   mots[0].move_velocity(0); // port 4 right
     //   mots[1].move_velocity(0);//port 5 left
     //   mots[2].move_velocity(0); //port 6 left
     //   mots[3].move_velocity(0);//port 7  right
     // }
-    
+
     void fwdsDrive(int power){//BASE
       driveLR(power, power);
     }
-    
+
     void pointTurn(int speed){//turn
       driveLR(speed, -speed);
     }
-    
+
     float computeVel(){
       float currentSensor = avg(encoderDistInch(encoderL.get_value()), encoderDistInch(encoderR.get_value()));
       const float delayAmnt = 20;
@@ -359,7 +359,7 @@ class ChassisOld{
       lastDriveVel = currentSensor;
       return driveVel;//converting inch/sec to ???
     }
-    
+
     float computeRotVel(){
       float currentSensor = odom.pos.heading;
       const float delayAmnt = 20;
@@ -367,7 +367,7 @@ class ChassisOld{
       lastRotVel = currentSensor;
       return rotVel;//converting degrees/sec to ???
     }
-    
+
     void smoothDrive(float speed, const float angle, float sharpness = 1) {//drive base forwards
       const float scalar = 2;//scalar for rotation
       sharpness += 1;//parameter is from 0-1, do this addition to make sure it ranges from (1-2) [as explained below]
@@ -377,7 +377,7 @@ class ChassisOld{
       float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
       driveLR(speed - dirSkew, speed + dirSkew);
     }
-    
+
     //higher levels
     void fwdsNEW(float amnt, int cap = 127){
       const float initEncL = encL;
@@ -395,7 +395,7 @@ class ChassisOld{
       fwdsDrive(0);
       pid[DRIVE].isRunning = false;
     }
-    
+
     void turnNEW(float amnt, int cap = 127){
       int t = 0;
       pid[ANGLE].goal = odom.pos.heading + amnt;
@@ -408,12 +408,12 @@ class ChassisOld{
       pointTurn(0);
       pid[ANGLE].isRunning = false;
     }
-    
+
     void turn(const float degrees, const int timeThresh = 400){
     //  turnTo(normAngle(odom.pos.heading + degrees), timeThresh);//basically turns to the current + increment
       return;
     }
-    
+
     void driveToPoint(float x, float y, bool isBackwards = false){
       //first compute angle to goal
       //also divide by 0 is fine bc atan2 has error handling

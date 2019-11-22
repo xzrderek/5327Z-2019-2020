@@ -27,7 +27,7 @@ class Robot{
 public:
 	//CONSTRUCTOR:
 	Robot() :
-	//mechanisms	
+	//mechanisms
 	tray(
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
@@ -46,7 +46,7 @@ public:
 	base(
 		{ Motor(RFront, true), Motor(LFront, true), Motor(LBack), Motor(RBack) }, //motors
 		{},//no sensors for intake, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 1.0, 10,  10, true, true)//PID
+		PIDcontroller(2.5, 0.0, 1.0, 10,  10, true, true)//PID
 	),
 	trayToggle(
 		{ Motor(TRAY) }, //motors
