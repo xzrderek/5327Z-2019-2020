@@ -4,6 +4,14 @@
 #include "robot.h"
 // #include "odom.h"
 
+#define LIFTTHRESHOLD_LOW (-800)
+#define LIFTTHRESHOLD_HIGH (-1200)
+#define LIFTLOW (-2400)
+#define LIFTMED (-3000)
+#define TRAYTARGET 1500
+#define TRAYRESTING 0
+#define TRAYNEUTRAL (-1)
+
 using namespace pros;
 using std::string;
 
@@ -15,6 +23,7 @@ float encM, encL, encR;
 int baseLine;
 float LeftBAvg, RightBAvg;
 volatile int gSlow = 1;
+volatile int gAdjustTray = TRAYNEUTRAL;
 
 void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
@@ -29,11 +38,19 @@ void updatePIDs(void* param) {
       rob.tray.setPIDState(OFF);
       rob.intake.setPIDState(OFF);
       rob.trayToggle.moveToPID(3800);
-      //rob.intake.moveNew(20);
+      rob.lift.moveToPID(700);
+    //rob.intake.moveNew(20);
       // rob.lift.moveNew(20);
       // rob.tray.moveNew(20);
 
-      lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+      // lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+    }
+
+    if(gAdjustTray != TRAYNEUTRAL) {
+      rob.tray.setPIDState(OFF);
+      rob.trayToggle.moveToPID(gAdjustTray);
+      gAdjustTray = TRAYNEUTRAL;
+      // rob.tray.setPIDState(ON);
     }
     //debug
     lcd::print(0, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
@@ -43,7 +60,7 @@ void updatePIDs(void* param) {
     lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
-    lcd::print(7, (string("Slow: ") + std::to_string(gSlow)).c_str());
+    lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
     //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
     //lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
 
@@ -53,25 +70,25 @@ void updatePIDs(void* param) {
   }
 }
 
-void trayToggleFunc(void *param) {
-  Robot* r = (Robot*) param;
-  const float delayAmnt = 2;
-  while(true){
-    if(master.btnA) {
-      rob.tray.setPIDState(OFF);
-      rob.intake.setPIDState(OFF);
-      rob.trayToggle.moveToPID(3800);
-      //rob.intake.moveNew(20);
-      // rob.lift.moveNew(20);
-      // rob.tray.moveNew(20);
+// void trayToggleFunc(void *param) {
+//   Robot* r = (Robot*) param;
+//   const float delayAmnt = 2;
+//   while(true){
+//     if(master.btnA) {
+//       rob.tray.setPIDState(OFF);
+//       rob.intake.setPIDState(OFF);
+//       rob.trayToggle.moveToPID(3800);
+//       //rob.intake.moveNew(20);
+//       // rob.lift.moveNew(20);
+//       // rob.tray.moveNew(20);
 
-      lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+//       lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
 
-      // delay
-      delay(delayAmnt);
-    }
-  }
-}
+//       // delay
+//       delay(delayAmnt);
+//     }
+//   }
+// }
 
 void updateSensor(void* param) {
   Robot* r = (Robot*) param;
@@ -222,6 +239,13 @@ void opcontrol() {
     if (master.btnL1 || master.btnL2) {
       rob.lift.setPIDState(OFF);
       pressedLift = true;
+
+      if (master.btnL1 && rob.lift.getSensorVal() < LIFTTHRESHOLD_LOW) {
+        gAdjustTray = TRAYTARGET;
+      }
+      // if (master.btnL2 && rob.lift.getSensorVal() > LIFTTHRESHOLD_HIGH) {
+      //   gAdjustTray = TRAYNEUTRAL; // TRAYRESTING;
+      // }
     } else if (pressedLift) {
         rob.lift.setPIDGoal(rob.lift.getSensorVal());
         rob.lift.setPIDState(ON);
