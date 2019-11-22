@@ -31,8 +31,8 @@ void updatePIDs(void* param) {
     lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
-    //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
-    lcd::print(7, (string("kp: ") + std::to_string(r->base.pid.kP)).c_str());
+    lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
+    lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
 
     // delay
     delay(delayAmnt);
@@ -196,11 +196,14 @@ void opcontrol() {
         pressedTray = false;
     }
 
-    //if(master.btnA){
+    if(master.btnA){
+      rob.tray.setPIDState(OFF);
+      rob.intake.setPIDState(OFF);
+      rob.trayToggle.moveToPID(3800);
       //rob.intake.moveNew(20);
       // rob.lift.moveNew(20);
       // rob.tray.moveNew(20);
-    //}
+    }
 
     // base
     rob.base.driveArcade(master.leftY, master.rightX);

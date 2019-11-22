@@ -148,6 +148,22 @@ class Mechanism{
     move(0);
   }
 
+  void moveToPID(float goal, float cap = 127, float power = 127) {
+    int t = 0;
+    setPIDGoal(goal);
+    setPIDState(ON);
+    float currentDist = 0;
+    while(t < 2000){
+      currentDist = getSensorVal();
+      move(clamp(cap, -cap, pid.compute(currentDist)));
+      delay(1);
+      t++;
+    }
+    move(0);
+    setPIDState(OFF);
+
+  }
+
   void simpleControl(int buttonUp, int buttonDown, int power = 127){
     move(buttonUp*power - buttonDown*power);//simple up down control with 2 buttons (perf for indexer)
   }
