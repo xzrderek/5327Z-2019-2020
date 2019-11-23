@@ -11,13 +11,13 @@ using pros::Motor, pros::ADIEncoder, std::string;
 using namespace pros;
 
 //defining motor ports:
-#define RFront   12
-#define RBack    13
+#define RFront   15
+#define RBack    11
 #define LFront   4
 #define LBack    2
 #define LIFT     19
-#define INTAKE1  9
-#define INTAKE2  21
+#define INTAKE1  8
+#define INTAKE2  10
 #define TRAY     6
 
 #define BACK true
