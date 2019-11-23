@@ -26,7 +26,7 @@ class Position {
     return sqrt( sqr(p1.X - X) + sqr(p1.Y - Y) );
   }
 };
-
+/*
 class Odometry {
   public:
   Odometry(Position primary, Position trackers) : pos(primary), t_pos(trackers){
@@ -48,7 +48,7 @@ class vec3 {
   float distanceV3(vec3 v) {	return sqrt(sqr(v.X - X) + sqr(v.Y - Y) + sqr(v.Z - Z)); }
   vec3 operator+(vec3 v) { return vec3(X + v.X, Y + v.Y, Z + v.Z); }
 };
-
+*/
 class PIDcontroller {
   public:
   PIDcontroller(float p, float i, float d, float t, float dT, bool rev, bool run, float r = 1.0) :
@@ -61,7 +61,7 @@ class PIDcontroller {
   volatile float thresh, delayThresh, goal;
   //functions
   float compute(float current, bool isAngle = false) {
-    if(isRunning){
+    if(true){
       if (!isAngle) error = current - goal;//calculate error
       else error = normAngle(current - goal);//calculate error
 
@@ -135,24 +135,24 @@ class Mechanism{
   //   }
   // }
 
-  void moveVel(float vel){
-    setPIDState(OFF);
-    for(const pros::Motor& m : mots){//for each motor in mots
-      m.move_velocity(vel);
-    }
-  }
+  // void moveVel(float vel){
+  //   setPIDState(OFF);
+  //   for(const pros::Motor& m : mots){//for each motor in mots
+  //     m.move_velocity(vel);
+  //   }
+  // }
 
-  void moveTo(float goal, float thresh, float power = 127){//simple encoder move
-    while(abs(getSensorVal() - goal) > thresh){
-      move(-sign(getSensorVal() - goal) * power);
-    }
-    move(0);
-  }
+  // void moveTo(float goal, float thresh, float power = 127){//simple encoder move
+  //   while(abs(getSensorVal() - goal) > thresh){
+  //     move(-sign(getSensorVal() - goal) * power);
+  //   }
+  //   move(0);
+  // }
 
   void moveToPID(float goal, float cap = 127, float power = 127) {
     int t = 0;
     setPIDGoal(goal);
-    setPIDState(ON);
+    // setPIDState(ON);
     float currentDist = 0;
     while(t < 2000){
       currentDist = getSensorVal();
@@ -161,7 +161,7 @@ class Mechanism{
       t++;
     }
     move(0);
-    setPIDState(OFF);
+    // setPIDState(OFF);
 
   }
 
@@ -169,24 +169,24 @@ class Mechanism{
     move(buttonUp*power - buttonDown*power);//simple up down control with 2 buttons (perf for indexer)
   }
 
-  void skrrt(int vel){
-    mots[0].move_velocity(vel);
-    mots[1].move_velocity(-vel);
-  }
+  // void skrrt(int vel){
+  //   mots[0].move_velocity(vel);
+  //   mots[1].move_velocity(-vel);
+  // }
 
-  void skrrt2(int vel){
-    mots[0].move_velocity(vel);
-    mots[1].move(127);
-  }
+  // void skrrt2(int vel){
+  //   mots[0].move_velocity(vel);
+  //   mots[1].move(127);
+  // }
 
-  void no(){
-    move(0);
-  }
+  // void no(){
+  //   move(0);
+  // }
 
-  void no2(){
-    mots[0].move(0);
-    mots[1].move(75);
-  }
+  // void no2(){
+  //   mots[0].move(0);
+  //   mots[1].move(75);
+  // }
   //
   // int toggeru(int urMother){ // ask me what upDog is - Uday
   //   if(urMother == 1){
@@ -214,22 +214,22 @@ class Mechanism{
   //   }
   // }
 
-  void moveAmnt(float amnt, float thresh, float power = 127){//simple encoder move
-    float starting = getSensorVal();
-    moveTo(starting + amnt, thresh, power);//moves to the position with AMNT as a constant quantity
-  }
+  // void moveAmnt(float amnt, float thresh, float power = 127){//simple encoder move
+  //   float starting = getSensorVal();
+  //   moveTo(starting + amnt, thresh, power);//moves to the position with AMNT as a constant quantity
+  // }
 
-  void moveTime(float time, float power = 127){//simple time based move
-    int t = 1;
-    while (t<time){
-      move(power);//moves to the position with TIME as a constant quantity
-      delay(1);
-      t++;
-    }
-    move(-power);
-    delay(10);
-    move(0);
-  }
+  // void moveTime(float time, float power = 127){//simple time based move
+  //   int t = 1;
+  //   while (t<time){
+  //     move(power);//moves to the position with TIME as a constant quantity
+  //     delay(1);
+  //     t++;
+  //   }
+  //   move(-power);
+  //   delay(10);
+  //   move(0);
+  // }
 
   bool isPIDRunnung() {
     return pid.isRunning;
@@ -240,8 +240,10 @@ class Mechanism{
     return;
   }
 
-  void setPIDState(bool state){//ON = true, OFF = false
+  bool setPIDState(bool state){//ON = true, OFF = false
+    bool ret = pid.isRunning;
     pid.isRunning = state;
+    return ret;
   }
 
   void setPIDGoal(float amnt){
@@ -252,35 +254,35 @@ class Mechanism{
     return pid.goal;
   }
 
-  void moveNew(float amnt){
-    setPIDGoal(amnt);
-    setPIDState(ON);
-    int t  = 0;
-    while(t < 2000){
-      PID();
-      delay(1);
-      t++;
-    }
-    setPIDState(OFF);
-  }
+  // void moveNew(float amnt){
+  //   setPIDGoal(amnt);
+  //   setPIDState(ON);
+  //   int t  = 0;
+  //   while(t < 2000){
+  //     PID();
+  //     delay(1);
+  //     t++;
+  //   }
+  //   setPIDState(OFF);
+  // }
 
-  float computeVel(){//in rots/min
-    float currentSensor = getSensorVal();
-    const float delayAmnt = 20;
-    velocity = ( currentSensor - lastVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
-    lastVel = currentSensor;
-    return velocity / 2.0; //(converting ticks/sec to rot/min
-      //[(ticks/sec) * (60sec/1min) * (1rev/360ticks)] * 3:1 (GR) = (1/6)*3 = 3/6 = 1/2)
-  }
+  // float computeVel(){//in rots/min
+  //   float currentSensor = getSensorVal();
+  //   const float delayAmnt = 20;
+  //   velocity = ( currentSensor - lastVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
+  //   lastVel = currentSensor;
+  //   return velocity / 2.0; //(converting ticks/sec to rot/min
+  //     //[(ticks/sec) * (60sec/1min) * (1rev/360ticks)] * 3:1 (GR) = (1/6)*3 = 3/6 = 1/2)
+  // }
 
-  float getMotorVel(){
-    float sumMotVels = 0;//average of all MOTOR encoders in vector list
-    for(const pros::Motor& m : mots){
-      sumMotVels += m.get_actual_velocity();
-    }
-    return sumMotVels / mots.size();//returns avg of all MOTOR encoders in vector list
+  // float getMotorVel(){
+  //   float sumMotVels = 0;//average of all MOTOR encoders in vector list
+  //   for(const pros::Motor& m : mots){
+  //     sumMotVels += m.get_actual_velocity();
+  //   }
+  //   return sumMotVels / mots.size();//returns avg of all MOTOR encoders in vector list
 
-  }
+  // }
 };
 
 class Chassis : public Mechanism {
@@ -312,8 +314,25 @@ public:
       mots[3].move(powerLR - powerFB); //port 7 right
     }
 
+    void turn(float goal, float power = 100, float cap = 127) {
+      int t = 0;
+      setPIDGoal(goal);
+      float state = setPIDState(OFF);
+      float currentDist = 0;
+      while(t < 2000){
+        currentDist = mots[0].get_position(); //use first motor as representation
+        float speed = clamp(cap, -cap, pid.compute(currentDist));
+        driveLR(speed, -speed);
+        delay(1);
+        t++;
+      }
+      driveLR(0,0);
+      setPIDState(state);
+    }
+
 };
 
+/*
 class ChassisOld{
   public:
     ChassisOld(std::vector<pros::Motor> m, std::vector<PIDcontroller> p, Odometry o) :
@@ -448,5 +467,5 @@ class ChassisOld{
       return;
     }
 };
-
+*/
 #endif

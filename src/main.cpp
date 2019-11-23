@@ -90,14 +90,14 @@ void updatePIDs(void* param) {
 //   }
 // }
 
-void updateSensor(void* param) {
-  Robot* r = (Robot*) param;
-  const float delayAmnt = 20;//ms delay for velocity calculations
-  while(true){
-    r->base.computeVel();
-    delay(delayAmnt);
-  }
-}
+// void updateSensor(void* param) {
+//   Robot* r = (Robot*) param;
+//   const float delayAmnt = 20;//ms delay for velocity calculations
+//   while(true){
+//     r->base.computeVel();
+//     delay(delayAmnt);
+//   }
+// }
 
 // void updateTask(void* param){
 //   Robot* r = (Robot*) param;
@@ -186,7 +186,23 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void doTrayToggle() {
+  rob.tray.setPIDState(OFF);
+  rob.intake.setPIDState(OFF);
+  rob.trayToggle.moveToPID(3800);
+  rob.lift.moveToPID(700);
+}
+
+void autonomous() {
+  rob.tray.moveToPID(400);
+  rob.intake.move(127);
+  //rob.intake.setPIDState(ON);
+  rob.base.moveToPID(1000);
+  rob.intake.move(0);
+  rob.base.turn(100);
+  rob.base.moveToPID(800);
+  doTrayToggle();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
