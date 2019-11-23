@@ -194,6 +194,8 @@ void doTrayToggle() {
 }
 
 void autonomous() {
+  Task PIDsUpdate(updatePIDs, &rob, "");
+
   rob.tray.moveToPID(400);
   rob.intake.move(127);
   //rob.intake.setPIDState(ON);
