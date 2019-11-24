@@ -15,10 +15,10 @@
 using namespace pros;
 using std::string;
 
-Controller master (E_CONTROLLER_MASTER);
+Controller master(E_CONTROLLER_MASTER);
 Robot rob = Robot();
 
-ADIEncoder encoderL (1, 2, true), encoderR (3, 4, false), encoderM (5, 6, false);
+ADIEncoder encoderL(1, 2, true), encoderR(3, 4, false), encoderM(5, 6, false);
 float encM, encL, encR;
 int baseLine;
 float LeftBAvg, RightBAvg;
@@ -28,31 +28,31 @@ volatile int gAdjustTray = TRAYNEUTRAL;
 void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
-  while(true){
-    r->tray.PID();
-    r->lift.PID();
-    r->intake.PID();
-    r->base.PID();
+  while (true) {
+    r -> tray.PID();
+    r -> lift.PID();
+    r -> intake.PID();
+    r -> base.PID();
 
-    if(master.btnA) {
+    if (master.btnA) {
       rob.tray.setPIDState(OFF);
       rob.intake.setPIDState(OFF);
       rob.trayToggle.moveToPID(3800);
       rob.lift.moveToPID(700);
-    //rob.intake.moveNew(20);
+      // rob.intake.moveNew(20);
       // rob.lift.moveNew(20);
       // rob.tray.moveNew(20);
 
       // lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
     }
 
-    if(gAdjustTray != TRAYNEUTRAL) {
+    if (gAdjustTray != TRAYNEUTRAL) {
       rob.tray.setPIDState(OFF);
       rob.trayToggle.moveToPID(gAdjustTray);
       gAdjustTray = TRAYNEUTRAL;
       // rob.tray.setPIDState(ON);
     }
-    //debug
+    // debug
     lcd::print(0, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
     lcd::print(1, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     lcd::print(2, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
@@ -61,8 +61,8 @@ void updatePIDs(void* param) {
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
     lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
-    //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
-    //lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
+    // lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
+    // lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
 
 
     // delay
@@ -73,12 +73,12 @@ void updatePIDs(void* param) {
 // void trayToggleFunc(void *param) {
 //   Robot* r = (Robot*) param;
 //   const float delayAmnt = 2;
-//   while(true){
-//     if(master.btnA) {
+//   while (true) {
+//     if (master.btnA) {
 //       rob.tray.setPIDState(OFF);
 //       rob.intake.setPIDState(OFF);
 //       rob.trayToggle.moveToPID(3800);
-//       //rob.intake.moveNew(20);
+//       // rob.intake.moveNew(20);
 //       // rob.lift.moveNew(20);
 //       // rob.tray.moveNew(20);
 
@@ -92,28 +92,28 @@ void updatePIDs(void* param) {
 
 // void updateSensor(void* param) {
 //   Robot* r = (Robot*) param;
-//   const float delayAmnt = 20;//ms delay for velocity calculations
-//   while(true){
+//   const float delayAmnt = 20; // ms delay for velocity calculations
+//   while (true) {
 //     r->base.computeVel();
 //     delay(delayAmnt);
 //   }
 // }
 
-// void updateTask(void* param){
+// void updateTask(void* param) {
 //   Robot* r = (Robot*) param;
 //   ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
 //   ADILineSensor light (2);
-//   while(true){
-//     LeftBAvg = avg(r->base.mots[1].get_position(), r->base.mots[2].get_position());//1, 2
-//     RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position());//0, 3
+//   while (true) {
+//     LeftBAvg = avg(r->base.mots[1].get_position(), r->base.mots[2].get_position()); // 1, 2
+//     RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position()); // 0, 3
 //     encM = encMo.get_value();
 //     encL = encLo.get_value();
 //     encR = -encRo.get_value();
-//   	baseLine = light.get_value();
-//     if(rob.base.odom.resetEncoders) {
+//   	 baseLine = light.get_value();
+//     if (rob.base.odom.resetEncoders) {
 //       encMo.reset();
-//   	  encLo.reset();
-//   	  encRo.reset();
+//   	   encLo.reset();
+//   	   encRo.reset();
 //     }
 
 //     lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
@@ -198,7 +198,7 @@ void autonomous() {
 
   rob.tray.moveToPID(400);
   rob.intake.move(127);
-  //rob.intake.setPIDState(ON);
+  // rob.intake.setPIDState(ON);
   rob.base.moveToPID(1000);
   rob.intake.move(0);
   rob.base.turn(100);
@@ -226,7 +226,7 @@ void opcontrol() {
   // Task taskUpdate(updateTask, &rob, "");
   Task PIDsUpdate(updatePIDs, &rob, "");
   // Task trayToggleTask(trayToggleFunc, &rob, "");
-//Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
+// Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
   // rob.base.odom.resetEncoders = true;
 
   bool pressedIntake = false, pressedTray = false, pressedLift = false;
@@ -294,26 +294,26 @@ void opcontrol() {
       pressedBase = false;
     }
 
-    // // if(!brake) rob.base.driveLR(master.rightY, master.leftY);
-    // if(master.btnY) {
+    // // if (!brake) rob.base.driveLR(master.rightY, master.leftY);
+    // if (master.btnY) {
     //   brake = !brake;
     //   delay(300);
     // }
 
-    // if(master.btnUP){
+    // if (master.btnUP) {
     //   rob.base.fwdsNEW(24);
     // }
 
-    // // if(master.btnRIGHT){
+    // // if (master.btnRIGHT) {
     // //   rob.base.odom.resetEncoders = true;
     // //   rob.base.odom.resetAngleSentinel = 90;
     // // }
 
-    // if(master.btnDOWN){
+    // if (master.btnDOWN) {
     //   rob.base.turnNEW(90);
     // }
 
-    // if(master.btnLEFT){
+    // if (master.btnLEFT) {
     //   rob.base.driveToPoint(-10, 10);
     // }
 
