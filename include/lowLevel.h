@@ -290,10 +290,8 @@ public:
     Chassis(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
     }
 
-    float yeet(float t){
-      float power = 2;
-      if(sign(t) > 0) return pow(t, power) / pow(127.0, power - 1.0);
-      return -pow(t, power) / pow(127.0, power - 1.0);
+    float yeet(float t) {
+      return abs(sqr(t) / 127.0);
     }
 
     void driveLR(int powerR, int powerL) {//low level

@@ -1,14 +1,13 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#define _USE_MATH_DEFINES
 #include "math.h"
 
 #define CW true
 #define CCW false
 #define ON true
 #define OFF false
-
-const float PI = 3.1415;
 
 inline int sign(int num) {
 	if (num < 0) return -1;
@@ -18,11 +17,11 @@ inline float sqr(float x){
 	return x*x;
 }
 inline float toRad(float deg){
-//PI/180 = 0.017453
-	return (deg * 0.017453);
+//M_PI/180 = 0.01745329251
+	return (deg * 0.01745329251);
 }
 inline float toDeg(float rad){
-	return (rad / 0.017453);
+	return (rad / 0.01745329251);
 }
 inline float avg(float a, float b){
 	return ((a + b) / 2.0);
@@ -45,22 +44,22 @@ inline float normAngle(float degrees){
 	else if (degrees < -180) return (degrees + 360);
 	return degrees;
 }
-inline float boundAngle(float radians) {//keeps radians within -PI to +PI
-	while (radians < -PI) radians += 2 * PI;
-	while (radians >= PI)	radians -= 2 * PI;
+inline float boundAngle(float radians) {//keeps radians within -M_PI to +M_PI
+	while (radians < -M_PI) radians += 2 * M_PI;
+	while (radians >= M_PI)	radians -= 2 * M_PI;
 	return radians;
 }
 inline float encoderDistInch(int rawSensor){
 	const float wheelDiam = 2.75;
 	const int countsPerRev = 360;
 	const int gearRatio = 1;//1 to 1
-	return (rawSensor * PI * wheelDiam) / (countsPerRev * gearRatio);
+	return (rawSensor * M_PI * wheelDiam) / (countsPerRev * gearRatio);
 }
 inline float encoderDistInchBASE(int rawSensor){
 	const float wheelDiam = 4.140;//base wheels
 	const int countsPerRev = 360;
 	const int gearRatio = 1;//1 to 1
-	return (rawSensor * PI * wheelDiam) / (countsPerRev * gearRatio);
+	return (rawSensor * M_PI * wheelDiam) / (countsPerRev * gearRatio);
 }
 inline bool isWithinBounds(const float current, const float goal, const float thresh){
 	return ( fabs(current - goal) < thresh );
