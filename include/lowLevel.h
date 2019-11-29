@@ -13,7 +13,7 @@ using namespace pros;
 #define ANGLE 1
 #define CURVE 2
 
-extern ADIEncoder encoderL, encoderR, encoderM;
+// extern ADIEncoder encoderL, encoderR, encoderM;
 extern float encM, encL, encR;
 extern volatile int gSlow;
 
@@ -26,7 +26,7 @@ class Position {
     return sqrt( sqr(p1.X - X) + sqr(p1.Y - Y) );
   }
 };
-/*
+
 class Odometry {
   public:
   Odometry(Position primary, Position trackers) : pos(primary), t_pos(trackers){
@@ -48,7 +48,7 @@ class vec3 {
   float distanceV3(vec3 v) {	return sqrt(sqr(v.X - X) + sqr(v.Y - Y) + sqr(v.Z - Z)); }
   vec3 operator+(vec3 v) { return vec3(X + v.X, Y + v.Y, Z + v.Z); }
 };
-*/
+
 class PIDcontroller {
   public:
   PIDcontroller(float p, float i, float d, float t, float dT, bool rev, bool run, float r = 1.0) :
@@ -285,9 +285,9 @@ class Mechanism{
   // }
 };
 
-class Chassis : public Mechanism {
+class ChassisNoOdom : public Mechanism {
 public:
-    Chassis(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
+    ChassisNoOdom(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
     }
 
     float yeet(float t){
@@ -332,10 +332,9 @@ public:
 
 };
 
-/*
-class ChassisOld{
+class Chassis{
   public:
-    ChassisOld(std::vector<pros::Motor> m, std::vector<PIDcontroller> p, Odometry o) :
+    Chassis(std::vector<pros::Motor> m, std::vector<PIDcontroller> p, Odometry o) :
     mots(m), pid(p), odom(o) {}
 
     //private:
@@ -351,22 +350,13 @@ class ChassisOld{
       return -pow(t, power) / pow(127.0, power - 1.0);
     }
 
-    void driveLRDEAD(int powerR, int powerL){//low level
-      powerL = clamp(127, -127, (powerL));
-      powerR = clamp(127, -127, (powerR));
-      mots[0].move(-powerR); // port 4 right
-      mots[1].move(powerL);//port 5 left
-      mots[2].move(powerL); //port 6 left
-      mots[3].move(-powerR);//port 7  right
-    }
-
     int thing(int potVal, int potReq){
       return ((potVal - potReq));
     }
 
     void driveLR(int powerR, int powerL){//low level
-      powerL = clamp(127, -127, yeet(powerL));
-      powerR = clamp(127, -127, yeet(powerR));
+      powerL = clamp(127, -127, yeet(powerL)) / gSlow;
+      powerR = clamp(127, -127, yeet(powerR)) / gSlow;
       mots[0].move(-powerR); // port 4 right
       mots[1].move(powerL);//port 5 left
       mots[2].move(powerL); //port 6 left
@@ -389,11 +379,13 @@ class ChassisOld{
     }
 
     float computeVel(){
-      float currentSensor = avg(encoderDistInch(encoderL.get_value()), encoderDistInch(encoderR.get_value()));
-      const float delayAmnt = 20;
-      driveVel = ( currentSensor - lastDriveVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
-      lastDriveVel = currentSensor;
-      return driveVel;//converting inch/sec to ???
+      //TODO: need it?
+      // float currentSensor = avg(encoderDistInch(encoderL.get_value()), encoderDistInch(encoderR.get_value()));
+      // const float delayAmnt = 20;
+      // driveVel = ( currentSensor - lastDriveVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
+      // lastDriveVel = currentSensor;
+      // return driveVel;//converting inch/sec to ???
+      return 0;
     }
 
     float computeRotVel(){
@@ -467,5 +459,5 @@ class ChassisOld{
       return;
     }
 };
-*/
+
 #endif

@@ -88,4 +88,14 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define rightY       get_analog(E_CONTROLLER_ANALOG_RIGHT_Y)
 #define rightX       get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
 
+//defining motor ports:
+#define RFront   15
+#define RBack    11
+#define LFront   4
+#define LBack    2
+#define LIFT     19
+#define INTAKE1  8
+#define INTAKE2  10
+#define TRAY     6
+
 #endif

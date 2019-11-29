@@ -10,16 +10,6 @@
 using pros::Motor, pros::ADIEncoder, std::string;
 using namespace pros;
 
-//defining motor ports:
-#define RFront   15
-#define RBack    11
-#define LFront   4
-#define LBack    2
-#define LIFT     19
-#define INTAKE1  8
-#define INTAKE2  10
-#define TRAY     6
-
 #define BACK true
 
 // extern ADIPotentiometer pot;
@@ -45,8 +35,8 @@ public:
 	),
 	base(
 		{ Motor(RFront, true), Motor(LFront, true), Motor(LBack), Motor(RBack) }, //motors
-		{},//no sensors for intake, thus use indexer motor
-		PIDcontroller(2.5, 0.0, 1.0, 10,  10, true, true)//PID
+		{ PIDcontroller(2.5, 0.0, 1.0, 10,  10, true, true) },//PID
+		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	),
 	trayToggle(
 		{ Motor(TRAY) }, //motors
@@ -74,7 +64,7 @@ public:
 	Mechanism intake;
 	Mechanism lift;
 	Mechanism trayToggle;
-	Chassis base; //Chassis base;
+	Chassis base; //ChassisNoOdom baseNoOdom;
 	float FWVelGoal = 0;
 
 	// void indexerAdvance(int amntTicks = 100){//bring indexer ball up once (given number of encoder ticks)

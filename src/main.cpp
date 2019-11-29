@@ -2,7 +2,10 @@
 #include "lowLevel.h"
 #include "api.h"
 #include "robot.h"
-// #include "odom.h"
+#include "odom.h"
+
+using namespace pros;
+using std::string;
 
 #define LIFTTHRESHOLD_LOW (-800)
 #define LIFTTHRESHOLD_HIGH (-1200)
@@ -12,13 +15,13 @@
 #define TRAYRESTING 0
 #define TRAYNEUTRAL (-1)
 
-using namespace pros;
-using std::string;
+// TODO
+ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
 
 Controller master (E_CONTROLLER_MASTER);
 Robot rob = Robot();
 
-ADIEncoder encoderL (1, 2, true), encoderR (3, 4, false), encoderM (5, 6, false);
+// ADIEncoder encoderL (1, 2, true), encoderR (3, 4, false), encoderM (5, 6, false);
 float encM, encL, encR;
 int baseLine;
 float LeftBAvg, RightBAvg;
@@ -32,7 +35,7 @@ void updatePIDs(void* param) {
     r->tray.PID();
     r->lift.PID();
     r->intake.PID();
-    r->base.PID();
+    // r->base.PID(); //TODO
 
     if(master.btnA) {
       rob.tray.setPIDState(OFF);
@@ -56,7 +59,7 @@ void updatePIDs(void* param) {
     lcd::print(0, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
     lcd::print(1, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     lcd::print(2, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    lcd::print(3, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
+    // lcd::print(3, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
     lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
@@ -99,34 +102,33 @@ void updatePIDs(void* param) {
 //   }
 // }
 
-// void updateTask(void* param){
-//   Robot* r = (Robot*) param;
-//   ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
-//   ADILineSensor light (2);
-//   while(true){
-//     LeftBAvg = avg(r->base.mots[1].get_position(), r->base.mots[2].get_position());//1, 2
-//     RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position());//0, 3
-//     encM = encMo.get_value();
-//     encL = encLo.get_value();
-//     encR = -encRo.get_value();
-//   	baseLine = light.get_value();
-//     if(rob.base.odom.resetEncoders) {
-//       encMo.reset();
-//   	  encLo.reset();
-//   	  encRo.reset();
-//     }
+void updateTask(void* param){
+  Robot* r = (Robot*) param;
+  ADILineSensor light (2);
+  while(true){
+    LeftBAvg = avg(r->base.mots[1].get_position(), r->base.mots[2].get_position());//1, 2
+    RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position());//0, 3
+    encM = encMo.get_value();
+    encL = encLo.get_value();
+    encR = -encRo.get_value();
+  	// baseLine = light.get_value();
+    if(rob.base.odom.resetEncoders) {
+      encMo.reset();
+  	  encLo.reset();
+  	  encRo.reset();
+    }
 
-//     lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
-//     lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
-//     lcd::print(2, (string("Theta: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
-//     lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
-//     lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
-//     lcd::print(5, (string("MEnc : ") + std::to_string( encM )).c_str());
-//     lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
+    lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
+    lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
+    lcd::print(2, (string("Theta: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
+    lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
+    lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
+    lcd::print(5, (string("MEnc : ") + std::to_string( encM )).c_str());
+    // lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
 
-//     delay(2);
-//   }
-// }
+    delay(2);
+  }
+}
 
 /**
  * A callback function for LLEMU's center button.
@@ -199,10 +201,10 @@ void autonomous() {
   rob.tray.moveToPID(400);
   rob.intake.move(127);
   //rob.intake.setPIDState(ON);
-  rob.base.moveToPID(1000);
+  rob.base.fwdsNEW(24);
   rob.intake.move(0);
   rob.base.turn(100);
-  rob.base.moveToPID(800);
+  rob.base.fwdsNEW(100);
   doTrayToggle();
 }
 
@@ -220,14 +222,14 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-  bool brake = false;
-
   // Task sensorUpdates(updateSensor, &rob, "");
-  // Task taskUpdate(updateTask, &rob, "");
+  Task taskUpdate(updateTask, &rob, "");
   Task PIDsUpdate(updatePIDs, &rob, "");
   // Task trayToggleTask(trayToggleFunc, &rob, "");
-//Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
-  // rob.base.odom.resetEncoders = true;
+  Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
+  rob.base.odom.resetEncoders = true;
+
+  int brake = 1;
 
   bool pressedIntake = false, pressedTray = false, pressedLift = false;
   bool pressedBase = false, pressedSlow = false;
@@ -284,38 +286,40 @@ void opcontrol() {
     }
 
     // base
-    rob.base.driveArcade(master.leftY, master.rightX);
-    if (master.rightX != 0 || master.leftY != 0) {
-      rob.base.setPIDState(OFF);
-      pressedBase = true;
-    } else if (pressedBase) {
-      rob.base.setPIDGoal(rob.base.getSensorVal());
-      rob.base.setPIDState(ON);
-      pressedBase = false;
+    // Base logic w/o odometry
+    // rob.base.driveArcade(master.leftY, master.rightX);
+    // if (master.rightX != 0 || master.leftY != 0) {
+    //   rob.base.setPIDState(OFF);
+    //   pressedBase = true;
+    // } else if (pressedBase) {
+    //   rob.base.setPIDGoal(rob.base.getSensorVal());
+    //   rob.base.setPIDState(ON);
+    //   pressedBase = false;
+    // }
+    if(brake == 1) rob.base.driveLR(master.leftY, master.rightX);
+    if(master.btnY) {
+      brake = !brake;
+      delay(300);
     }
 
-    // // if(!brake) rob.base.driveLR(master.rightY, master.leftY);
-    // if(master.btnY) {
-    //   brake = !brake;
-    //   delay(300);
-    // }
+    //TODO
+    
+    if(master.btnUP){
+      rob.base.fwdsNEW(24);
+    }
 
-    // if(master.btnUP){
-    //   rob.base.fwdsNEW(24);
-    // }
+    if(master.btnRIGHT){
+      rob.base.odom.resetEncoders = true;
+      rob.base.odom.resetAngleSentinel = 90;
+    }
 
-    // // if(master.btnRIGHT){
-    // //   rob.base.odom.resetEncoders = true;
-    // //   rob.base.odom.resetAngleSentinel = 90;
-    // // }
+    if(master.btnLEFT){
+      rob.base.turnNEW(90);
+    }
 
-    // if(master.btnDOWN){
-    //   rob.base.turnNEW(90);
-    // }
-
-    // if(master.btnLEFT){
-    //   rob.base.driveToPoint(-10, 10);
-    // }
+    if(master.btnLEFT){
+      rob.base.driveToPoint(-10, 10);
+    }
 
     delay(2);
   }
