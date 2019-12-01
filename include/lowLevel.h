@@ -35,7 +35,7 @@ class Odometry {
   }//init constructor defaulted
   Position pos, t_pos;
   volatile bool resetEncoders = false;
-  const float wheelWidth = 7;//(8.75+1.25*2)*1.09;//distance betweenn L&Rtrackers on base (inch)
+  const float wheelWidth = WHEELWIDTH;//(8.75+1.25*2)*1.09;//distance betweenn L&Rtrackers on base (inch)
   float lastL = 0, lastR = 0, lastM = 0, resetAngleSentinel = -PI;
 };
 
@@ -407,7 +407,7 @@ class Chassis{
     }
 
     //higher levels
-    void fwdsNEW(float amnt, int cap = 127){
+    void fwdsUntil(float amnt, int cap = 127){
       const float initEncL = encL;
       const float initEncR = encR;
       int t = 0;
@@ -424,7 +424,7 @@ class Chassis{
       pid[DRIVE].isRunning = false;
     }
 
-    void turnNEW(float amnt, int cap = 127){
+    void turnUntil(float amnt, int cap = 127){
       int t = 0;
       pid[ANGLE].goal = odom.pos.heading + amnt;
       pid[ANGLE].isRunning = true;
@@ -437,10 +437,8 @@ class Chassis{
       pid[ANGLE].isRunning = false;
     }
 
-    void turn(const float degrees, const int timeThresh = 400){
+    // void turn(const float degrees, const int timeThresh = 400){
     //  turnTo(normAngle(odom.pos.heading + degrees), timeThresh);//basically turns to the current + increment
-      return;
-    }
 
     void driveToPoint(float x, float y, bool isBackwards = false){
       //first compute angle to goal
@@ -449,13 +447,68 @@ class Chassis{
       //then compute distance to goal
       float dist = sqrt(sqr(y - odom.pos.Y) + sqr(x - odom.pos.X));
       if(!isBackwards) {//normal turn to angle and drive
-        turnNEW(phi);//simple point turn
-        fwdsNEW(dist);//simple drive forwards
+        turnUntil(phi);//simple point turn
+        fwdsUntil(dist);//simple drive forwards
       }
       else {//drive to point, but backwards, so back reaches the point first.
-        turnNEW(normAngle(phi + 180));//simple point turn (but backwards)
-        fwdsNEW(-dist);//simple drive forwards
+        turnUntil(normAngle(phi + 180));//simple point turn (but backwards)
+        fwdsUntil(-dist);//simple drive forwards
       }
+      return;
+    }
+
+    void fwdsPID(int cap = 127){
+      const float initEncL = encL;
+      const float initEncR = encR;
+      int t = 0;
+      float currentDist = 0;
+      while(t < 2){
+        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
+        fwdsDrive(clamp(cap, -cap, pid[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+      }
+      // fwdsDrive(0);
+      // pid[DRIVE].isRunning = false;
+    }
+
+    void turnPID(int cap = 127){
+      int t = 0;
+      while(t < 2){
+        pointTurn(pid[ANGLE].compute(odom.pos.heading, true));
+        delay(1);
+        t++;
+      }
+      // pointTurn(0);
+      // pid[ANGLE].isRunning = false;
+    }
+
+    void setPIDGoal(float x, float y, bool isBackwards = false){
+      //first compute angle to goal
+      //also divide by 0 is fine bc atan2 has error handling
+      float phi = normAngle(toDeg(atan2((y - odom.pos.Y), (x - odom.pos.X))));
+      //then compute distance to goal
+      float dist = sqrt(sqr(y - odom.pos.Y) + sqr(x - odom.pos.X));
+      if(isBackwards) {//normal turn to angle and drive
+        phi = normAngle(phi + 180);//simple point turn (but backwards)
+        dist = -dist;//simple drive forwards
+      }
+      pid[DRIVE].goal = dist;       
+      pid[DRIVE].isRunning = true;
+      pid[ANGLE].goal = odom.pos.heading + phi;
+      pid[ANGLE].isRunning = true;
+      return;
+    }
+
+    void PID(){//does a PID move HAVE TO SET PID GOAL BEFOREHAND
+      if(pid[DRIVE].isRunning) fwdsPID();
+      if(pid[ANGLE].isRunning) turnPID();
+      return;
+    }
+
+    void setPIDState(bool state){//ON = true, OFF = false
+      pid[DRIVE].isRunning = state;
+      pid[ANGLE].isRunning = state;
       return;
     }
 };

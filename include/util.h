@@ -98,4 +98,8 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define INTAKE2  10
 #define TRAY     6
 
+// TODO
+#define WHEELWIDTH 7
+#define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
+
 #endif

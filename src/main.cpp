@@ -16,7 +16,7 @@ using std::string;
 #define TRAYNEUTRAL (-1)
 
 // TODO
-ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
+DEFINE_TRACKERS
 
 Controller master (E_CONTROLLER_MASTER);
 Robot rob = Robot();
@@ -35,7 +35,7 @@ void updatePIDs(void* param) {
     r->tray.PID();
     r->lift.PID();
     r->intake.PID();
-    // r->base.PID(); //TODO
+    r->base.PID();
 
     if(master.btnA) {
       rob.tray.setPIDState(OFF);
@@ -56,16 +56,13 @@ void updatePIDs(void* param) {
       // rob.tray.setPIDState(ON);
     }
     //debug
-    lcd::print(0, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
-    lcd::print(1, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
-    lcd::print(2, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    // lcd::print(3, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
-    lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
-    lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
-    lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
-    lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
-    //lcd::print(7, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
-    //lcd::print(8, (string("toggle goal: ") + std::to_string(r->trayToggle.getPIDGoal())).c_str());
+    lcd::print(8, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
+    lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
+    lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
+    // lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
+    // lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
+    // lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
+    // lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
 
 
     // delay
@@ -201,10 +198,9 @@ void autonomous() {
   rob.tray.moveToPID(400);
   rob.intake.move(127);
   //rob.intake.setPIDState(ON);
-  rob.base.fwdsNEW(24);
+  rob.base.driveToPoint(100, 100);
   rob.intake.move(0);
-  rob.base.turn(100);
-  rob.base.fwdsNEW(100);
+  rob.base.driveToPoint(200, 300);
   doTrayToggle();
 }
 
@@ -243,6 +239,7 @@ void opcontrol() {
       else gSlow = 1;
       pressedSlow = false;
     }
+
     // intake
     rob.intake.simpleControl(master.btnR1, master.btnR2);
     if (master.btnR2 || master.btnR1) {
@@ -286,7 +283,8 @@ void opcontrol() {
     }
 
     // base
-    // Base logic w/o odometry
+
+    // Base w/o odometry
     // rob.base.driveArcade(master.leftY, master.rightX);
     // if (master.rightX != 0 || master.leftY != 0) {
     //   rob.base.setPIDState(OFF);
@@ -296,16 +294,27 @@ void opcontrol() {
     //   rob.base.setPIDState(ON);
     //   pressedBase = false;
     // }
-    if(brake == 1) rob.base.driveLR(master.leftY, master.rightX);
-    if(master.btnY) {
-      brake = !brake;
-      delay(300);
+
+    // Base with odometry
+    rob.base.driveLR(master.leftY, master.rightX);
+    if (master.rightX != 0 || master.leftY != 0) {
+      rob.base.setPIDState(OFF);
+      pressedBase = true;
+    } else if (pressedBase) {
+      rob.base.setPIDGoal(rob.base.odom.pos.X, rob.base.odom.pos.Y);
+      pressedBase = false;
     }
+
+    // if(brake == 1) rob.base.driveLR(master.leftY, master.rightX);
+    // if(master.btnY) {
+    //   brake = !brake;
+    //   delay(300);
+    // }
 
     //TODO
     
     if(master.btnUP){
-      rob.base.fwdsNEW(24);
+      rob.base.driveToPoint(100, 200);
     }
 
     if(master.btnRIGHT){
@@ -314,10 +323,10 @@ void opcontrol() {
     }
 
     if(master.btnLEFT){
-      rob.base.turnNEW(90);
+      rob.base.turnUntil(90);
     }
 
-    if(master.btnLEFT){
+    if(master.btnY){
       rob.base.driveToPoint(-10, 10);
     }
 
