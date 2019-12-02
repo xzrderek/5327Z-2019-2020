@@ -7,12 +7,6 @@
 
 using namespace pros;
 
-#define ON true
-#define OFF false
-#define DRIVE 0
-#define ANGLE 1
-#define CURVE 2
-
 // extern ADIEncoder encoderL, encoderR, encoderM;
 extern float encM, encL, encR;
 extern volatile int gSlow;
@@ -53,15 +47,29 @@ class PIDcontroller {
   public:
   PIDcontroller(float p, float i, float d, float t, float dT, bool rev, bool run, float r = 1.0) :
   kP(p), kI(i), kD(d), thresh(t), delayThresh(dT), isReversed(rev), isRunning(run),
-  LastError(0), Integral(0), Derivative(0), goal(0), ratio(r) {}
+  LastError(0), Integral(0), Derivative(0), goal(0), ratio(r) {
+    ratio = 1.0;
+    isRunning = false;
+  }
   float kP, kI, kD;
   float error, ratio;
   volatile bool isReversed, isRunning;
   float Integral, Derivative, LastError;
   volatile float thresh, delayThresh, goal;
   //functions
+  void setGoal(float g) {
+    goal = g;
+    // if (abs(g) < 127) {
+    //   ratio = 127 / abs(g);
+    //   goal = g * ratio;
+    // }
+  }
+  float getGoal() {
+    return goal;
+  }
   float compute(float current, bool isAngle = false) {
     if(true){
+      current = current * ratio;
       if (!isAngle) error = current - goal;//calculate error
       else error = normAngle(current - goal);//calculate error
 
@@ -85,7 +93,7 @@ class PIDcontroller {
       power += kD * Derivative;
       //final proportional output
       power += kP * error;
-      return dir * power / ratio;
+      return dir * power;
     }
     return 0;
   }
@@ -247,11 +255,11 @@ class Mechanism{
   }
 
   void setPIDGoal(float amnt){
-    pid.goal = amnt;
+    pid.setGoal(amnt);
   }
 
   float getPIDGoal() {
-    return pid.goal;
+    return pid.getGoal();
   }
 
   // void moveNew(float amnt){
@@ -322,11 +330,11 @@ public:
       while(t < 2000){
         currentDist = mots[0].get_position(); //use first motor as representation
         float speed = clamp(cap, -cap, pid.compute(currentDist));
-        driveLR(speed, -speed);
+        driveArcade(0, speed);
         delay(1);
         t++;
       }
-      driveLR(0,0);
+      driveArcade(0,0);
       setPIDState(state);
     }
 
@@ -335,11 +343,11 @@ public:
 class Chassis{
   public:
     Chassis(std::vector<pros::Motor> m, std::vector<PIDcontroller> p, Odometry o) :
-    mots(m), pid(p), odom(o) {}
+    mots(m), pids(p), odom(o) {}
 
     //private:
     std::vector<pros::Motor> mots;//first 2 mots are RIGHT, second two are LEFT
-    std::vector<PIDcontroller> pid;
+    std::vector<PIDcontroller> pids;
     float lastDriveVel = 0, lastRotVel = 0;
     float driveVel = 0, rotVel = 0;
     class Odometry odom;
@@ -354,13 +362,22 @@ class Chassis{
       return ((potVal - potReq));
     }
 
-    void driveLR(int powerR, int powerL){//low level
-      powerL = clamp(127, -127, yeet(powerL)) / gSlow;
-      powerR = clamp(127, -127, yeet(powerR)) / gSlow;
-      mots[0].move(-powerR); // port 4 right
-      mots[1].move(powerL);//port 5 left
-      mots[2].move(powerL); //port 6 left
-      mots[3].move(-powerR);//port 7  right
+    // void driveLR(int powerR, int powerL){//low level
+    //   powerL = clamp(127, -127, yeet(powerL)) / gSlow;
+    //   powerR = clamp(127, -127, yeet(powerR)) / gSlow;
+    //   mots[0].move(-powerR); // port 4 right
+    //   mots[1].move(powerL);//port 5 left
+    //   mots[2].move(powerL); //port 6 left
+    //   mots[3].move(-powerR);//port 7  right
+    // }
+
+    void driveArcade(int powerFB, int powerLR) {
+      powerLR = clamp(50, -50, yeet(powerLR)) / gSlow;
+      powerFB = clamp(127, -127, yeet(powerFB)) / gSlow;
+      mots[0].move(powerFB - powerLR); //port 4 right front
+      mots[1].move(powerFB + powerLR); //port 5 left front
+      mots[2].move(powerFB + powerLR); //port 6 left back
+      mots[3].move(powerFB - powerLR); //port 7 right back
     }
 
     // void brakeHecka(int potVal){//low level
@@ -371,11 +388,11 @@ class Chassis{
     // }
 
     void fwdsDrive(int power){//BASE
-      driveLR(power, power);
+      driveArcade(power, 0);
     }
 
-    void pointTurn(int speed){//turn
-      driveLR(speed, -speed);
+    void pointTurn(int power){//turn
+      driveArcade(0, power);
     }
 
     float computeVel(){
@@ -403,38 +420,55 @@ class Chassis{
       //for sharpness: 2 is direct point turn, 1 is turning off one side...
       //	it basically is just how much the different sides can be reversed to increase tha sharpness of the curve
       float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
-      driveLR(speed - dirSkew, speed + dirSkew);
+      driveArcade(speed, dirSkew);
     }
 
     //higher levels
     void fwdsUntil(float amnt, int cap = 127){
-      const float initEncL = encL;
-      const float initEncR = encR;
+      float initX = odom.pos.X;
+      float initY = odom.pos.Y;
       int t = 0;
-      pid[DRIVE].goal = amnt;
-      pid[DRIVE].isRunning = true;
+      pids[DRIVE].setGoal(amnt);
+      pids[DRIVE].isRunning = true;
       float currentDist = 0;
       while(t < 2000){
-        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
-        fwdsDrive(clamp(cap, -cap, pid[DRIVE].compute(currentDist)));
+        currentDist = sqrt(sqr(odom.pos.X - initX) + sqr(odom.pos.Y - initY));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
         delay(1);
         t++;
       }
       fwdsDrive(0);
-      pid[DRIVE].isRunning = false;
+      pids[DRIVE].isRunning = false;
+    }
+
+    void fwdsUntilRelative(float amnt, int cap = 127){
+      const float initEncL = encL;
+      const float initEncR = encR;
+      int t = 0;
+      pids[DRIVE].setGoal(amnt);
+      pids[DRIVE].isRunning = true;
+      float currentDist = 0;
+      while(t < 2000){
+        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+      }
+      fwdsDrive(0);
+      pids[DRIVE].isRunning = false;
     }
 
     void turnUntil(float amnt, int cap = 127){
       int t = 0;
-      pid[ANGLE].goal = odom.pos.heading + amnt;
-      pid[ANGLE].isRunning = true;
+      pids[ANGLE].setGoal(odom.pos.heading + amnt);
+      pids[ANGLE].isRunning = true;
       while(t < 2000){
-        pointTurn(pid[ANGLE].compute(odom.pos.heading, true));
+        pointTurn(pids[ANGLE].compute(odom.pos.heading, true));
         delay(1);
         t++;
       }
       pointTurn(0);
-      pid[ANGLE].isRunning = false;
+      pids[ANGLE].isRunning = false;
     }
 
     // void turn(const float degrees, const int timeThresh = 400){
@@ -457,60 +491,98 @@ class Chassis{
       return;
     }
 
-    void fwdsPID(int cap = 127){
-      const float initEncL = encL;
-      const float initEncR = encR;
-      int t = 0;
-      float currentDist = 0;
-      while(t < 2){
-        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
-        fwdsDrive(clamp(cap, -cap, pid[DRIVE].compute(currentDist)));
-        delay(1);
-        t++;
+    void move(float power){
+      // setPIDState(OFF);
+      for(const pros::Motor& m : mots){//for each motor in mots
+        m.move(power / gSlow);
       }
-      // fwdsDrive(0);
-      // pid[DRIVE].isRunning = false;
+    }
+    
+    float getSensorVal(){
+      float sumMotEncoders = 0;//average of all MOTOR encoders in vector list
+      for(const pros::Motor& m : mots){
+        sumMotEncoders += m.get_position();
+      }
+      return sumMotEncoders / mots.size();//returns avg of all MOTOR encoders in vector list
     }
 
-    void turnPID(int cap = 127){
-      int t = 0;
-      while(t < 2){
-        pointTurn(pid[ANGLE].compute(odom.pos.heading, true));
-        delay(1);
-        t++;
-      }
-      // pointTurn(0);
-      // pid[ANGLE].isRunning = false;
-    }
-
-    void setPIDGoal(float x, float y, bool isBackwards = false){
-      //first compute angle to goal
-      //also divide by 0 is fine bc atan2 has error handling
-      float phi = normAngle(toDeg(atan2((y - odom.pos.Y), (x - odom.pos.X))));
-      //then compute distance to goal
-      float dist = sqrt(sqr(y - odom.pos.Y) + sqr(x - odom.pos.X));
-      if(isBackwards) {//normal turn to angle and drive
-        phi = normAngle(phi + 180);//simple point turn (but backwards)
-        dist = -dist;//simple drive forwards
-      }
-      pid[DRIVE].goal = dist;       
-      pid[DRIVE].isRunning = true;
-      pid[ANGLE].goal = odom.pos.heading + phi;
-      pid[ANGLE].isRunning = true;
-      return;
+    bool isPIDRunnung() {
+      return pids[DRIVE2].isRunning;
     }
 
     void PID(){//does a PID move HAVE TO SET PID GOAL BEFOREHAND
-      if(pid[DRIVE].isRunning) fwdsPID();
-      if(pid[ANGLE].isRunning) turnPID();
+      if(pids[DRIVE2].isRunning) move(pids[DRIVE2].compute(getSensorVal()));
       return;
     }
 
-    void setPIDState(bool state){//ON = true, OFF = false
-      pid[DRIVE].isRunning = state;
-      pid[ANGLE].isRunning = state;
-      return;
+    bool setPIDState(bool state){//ON = true, OFF = false
+      bool ret = pids[DRIVE2].isRunning;
+      pids[DRIVE2].isRunning = state;
+      return ret;
     }
+
+    void setPIDGoal(float amnt){
+      pids[DRIVE2].setGoal(amnt);
+    }
+
+    float getPIDGoal() {
+      return pids[DRIVE2].getGoal();
+    }
+    // void fwdsPID(int cap = 127){
+    //   float initX = odom.pos.X;
+    //   float initY = odom.pos.Y;
+    //   int t = 0;
+    //   float currentDist = 0;
+    //   while(t < 2){
+    //     currentDist = sqrt(sqr(odom.pos.X - initX) + sqr(odom.pos.Y - initY));
+    //     // currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
+    //     fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+    //     delay(1);
+    //     t++;
+    //   }
+    //   // fwdsDrive(0);
+    //   // pids[DRIVE].isRunning = false;
+    // }
+
+    // void turnPID(int cap = 127){
+    //   int t = 0;
+    //   while(t < 2){
+    //     pointTurn(pids[ANGLE].compute(odom.pos.heading, true));
+    //     delay(1);
+    //     t++;
+    //   }
+    //   // pointTurn(0);
+    //   // pids[ANGLE].isRunning = false;
+    // }
+
+    // void setPIDGoal(float x, float y, bool isBackwards = false){
+    //   //first compute angle to goal
+    //   //also divide by 0 is fine bc atan2 has error handling
+    //   float phi = normAngle(toDeg(atan2((y - odom.pos.Y), (x - odom.pos.X))));
+    //   //then compute distance to goal
+    //   float dist = sqrt(sqr(y - odom.pos.Y) + sqr(x - odom.pos.X));
+    //   if(isBackwards) {//normal turn to angle and drive
+    //     phi = normAngle(phi + 180);//simple point turn (but backwards)
+    //     dist = -dist;//simple drive forwards
+    //   }
+    //   pids[DRIVE].setGoal(dist);       
+    //   pids[DRIVE].isRunning = true;
+    //   pids[ANGLE].setGoal(odom.pos.heading + phi);
+    //   pids[ANGLE].isRunning = true;
+    //   return;
+    // }
+
+    // void PID(){//does a PID move HAVE TO SET PID GOAL BEFOREHAND
+    //   if(pids[DRIVE].isRunning) fwdsPID();
+    //   if(pids[ANGLE].isRunning) turnPID();
+    //   return;
+    // }
+
+    // void setPIDState(bool state){//ON = true, OFF = false
+    //   pids[DRIVE].isRunning = state;
+    //   pids[ANGLE].isRunning = state;
+    //   return;
+    // }
 };
 
 #endif

@@ -38,7 +38,7 @@ void calculatePosBASE(void* param){
         Odom->t_pos.X += dCentral * cos(radHeading) + dM * sin(radHeading);
         Odom->t_pos.Y += dCentral * sin(radHeading) - dM * cos(radHeading);
         //add little vector after calculating H mech's position
-        const float distToCenter = 4.45;//inches the center of the H mech to the center of r's rotation
+        const float distToCenter = (Odom->wheelWidth / 2);//inches the center of the H mech to the center of r's rotation
         Odom->pos.heading = normAngle(Odom->t_pos.heading + 90);
         Odom->pos.X = Odom->t_pos.X + distToCenter * cos(radHeading);
         Odom->pos.Y = Odom->t_pos.Y + distToCenter * sin(radHeading) - distToCenter;

@@ -32,6 +32,10 @@ void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
   while(true){
+    if(r->tray.getSensorVal() > 1000 && r->lift.getSensorVal() > -1000) {
+      r->intake.setPIDState(OFF);
+    }
+
     r->tray.PID();
     r->lift.PID();
     r->intake.PID();
@@ -56,9 +60,11 @@ void updatePIDs(void* param) {
       // rob.tray.setPIDState(ON);
     }
     //debug
-    lcd::print(8, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
+    // lcd::print(6, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
+    lcd::print(6, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
+
     // lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     // lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     // lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
@@ -107,7 +113,7 @@ void updateTask(void* param){
     RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position());//0, 3
     encM = encMo.get_value();
     encL = encLo.get_value();
-    encR = -encRo.get_value();
+    encR = encRo.get_value();
   	// baseLine = light.get_value();
     if(rob.base.odom.resetEncoders) {
       encMo.reset();
@@ -117,7 +123,7 @@ void updateTask(void* param){
 
     lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
     lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
-    lcd::print(2, (string("Theta: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
+    lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
     lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
     lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
     lcd::print(5, (string("MEnc : ") + std::to_string( encM )).c_str());
@@ -188,7 +194,7 @@ void competition_initialize() {}
 void doTrayToggle() {
   rob.tray.setPIDState(OFF);
   rob.intake.setPIDState(OFF);
-  rob.trayToggle.moveToPID(3800);
+  rob.trayToggle.moveToPID(4100);
   rob.lift.moveToPID(700);
 }
 
@@ -218,12 +224,13 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+  rob.base.odom.resetEncoders = true;
+
   // Task sensorUpdates(updateSensor, &rob, "");
   Task taskUpdate(updateTask, &rob, "");
   Task PIDsUpdate(updatePIDs, &rob, "");
   // Task trayToggleTask(trayToggleFunc, &rob, "");
   Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
-  rob.base.odom.resetEncoders = true;
 
   int brake = 1;
 
@@ -241,7 +248,7 @@ void opcontrol() {
     }
 
     // intake
-    rob.intake.simpleControl(master.btnR1, master.btnR2);
+    rob.intake.simpleControl(master.btnR2, master.btnR1);
     if (master.btnR2 || master.btnR1) {
       rob.intake.setPIDState(OFF);
       pressedIntake = true;
@@ -284,26 +291,25 @@ void opcontrol() {
 
     // base
 
-    // Base w/o odometry
+    rob.base.driveArcade(master.leftY, master.rightX);
+    if (master.rightX != 0 || master.leftY != 0) {
+      rob.base.setPIDState(OFF);
+      pressedBase = true;
+    } else if (pressedBase) {
+      rob.base.setPIDGoal(rob.base.getSensorVal());
+      rob.base.setPIDState(ON);
+      pressedBase = false;
+    }
+
+    // Base with odometry
     // rob.base.driveArcade(master.leftY, master.rightX);
     // if (master.rightX != 0 || master.leftY != 0) {
     //   rob.base.setPIDState(OFF);
     //   pressedBase = true;
     // } else if (pressedBase) {
-    //   rob.base.setPIDGoal(rob.base.getSensorVal());
-    //   rob.base.setPIDState(ON);
+    //   rob.base.setPIDGoal(rob.base.odom.pos.X, rob.base.odom.pos.Y);
     //   pressedBase = false;
     // }
-
-    // Base with odometry
-    rob.base.driveLR(master.leftY, master.rightX);
-    if (master.rightX != 0 || master.leftY != 0) {
-      rob.base.setPIDState(OFF);
-      pressedBase = true;
-    } else if (pressedBase) {
-      rob.base.setPIDGoal(rob.base.odom.pos.X, rob.base.odom.pos.Y);
-      pressedBase = false;
-    }
 
     // if(brake == 1) rob.base.driveLR(master.leftY, master.rightX);
     // if(master.btnY) {
@@ -312,9 +318,9 @@ void opcontrol() {
     // }
 
     //TODO
-    
+
     if(master.btnUP){
-      rob.base.driveToPoint(100, 200);
+      rob.base.driveToPoint(10, 20);
     }
 
     if(master.btnRIGHT){

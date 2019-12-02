@@ -88,18 +88,24 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define rightY       get_analog(E_CONTROLLER_ANALOG_RIGHT_Y)
 #define rightX       get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
 
+#define ON true
+#define OFF false
+#define DRIVE 0
+#define ANGLE 1
+#define DRIVE2 2
+
 //defining motor ports:
-#define RFront   15
-#define RBack    11
-#define LFront   4
-#define LBack    2
-#define LIFT     19
-#define INTAKE1  8
-#define INTAKE2  10
-#define TRAY     6
+#define RFront   13
+#define RBack    12
+#define LFront   19
+#define LBack    6
+#define LIFT     21
+#define INTAKE1  18
+#define INTAKE2  9
+#define TRAY     2
 
 // TODO
 #define WHEELWIDTH 5.5
-#define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (3, 4, false);
+#define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (3, 4, false), encLo (5, 6, false);
 
 #endif

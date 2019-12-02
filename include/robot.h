@@ -21,7 +21,7 @@ public:
 	tray(
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 3.0, 10,  10, true, true, 30)//PID
+		PIDcontroller(0.05, 0.0, 0.1, 10,  10, true, true)//PID
 	),
 	intake(
 		{ Motor(INTAKE1), Motor(INTAKE2, true) }, //motors
@@ -31,17 +31,19 @@ public:
 	lift(
 		{ Motor(LIFT)}, //motors
 		{},//no sensors for lift, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 4.0, 10,  10, true, true)//PID
+		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, true)//PID
 	),
 	base(
-		{ Motor(RFront, true), Motor(LFront, true), Motor(LBack), Motor(RBack) }, //motors
-		{ PIDcontroller(2.5, 0.0, 1.0, 10,  10, true, true) },//PID
+		{ Motor(RFront), Motor(LFront, true), Motor(LBack), Motor(RBack, true) }, //motors
+		{ PIDcontroller(12, 0.0, 0.05, 1.75, 10, true, true),
+		  PIDcontroller(3.5, 0.0, 0.5, 2.0,  10, true, true),
+		  PIDcontroller(0.1, 0.0, 0.05, 1.75,  10, true, true) },//PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	),
 	trayToggle(
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 1.0, 10,  10, true, true, 30)//PID
+		PIDcontroller(0.07, 1.0, 0.1, 100,  10, true, true)//PID
 	)
 	// base(//motors
 	// 	{ Motor(RFront), Motor(LFront), Motor(LBack), Motor(RBack) },
@@ -93,7 +95,7 @@ public:
 		// //ret.push_back(string("FlywheelPos: ") + std::to_string( flywheelEnc.get_value()));
 		// //ret.push_back(string("FlywheelVel(rpm): ") + std::to_string( flywheel.velocity/2) + string(" Motors: ") + std::to_string( flywheel.getMotorVel() ));
 		// ret.push_back(string("base Vel: ") + std::to_string( base.driveVel) + string("; rot Vel: ") + std::to_string( base.rotVel));
-		// ret.push_back(string("Angle Err: ") + std::to_string( base.pid[ANGLE].error));
+		// ret.push_back(string("Angle Err: ") + std::to_string( base.pids[ANGLE].error));
 
 		// //ret.push_back(string("Error Val: ") + strerror(errno));
 		// return ret;
