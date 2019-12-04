@@ -9,7 +9,6 @@ using namespace pros;
 
 // extern ADIEncoder encoderL, encoderR, encoderM;
 extern float encM, encL, encR;
-extern volatile int gSlow;
 
 class Position {
   public:
@@ -23,10 +22,14 @@ class Position {
 
 class Odometry {
   public:
-  Odometry(Position primary, Position trackers) : pos(primary), t_pos(trackers){
-    pos.X = pos.X = pos.heading = 0.0;
-    t_pos.X = t_pos.X = t_pos.heading = 0.0;
-  }//init constructor defaulted
+  Odometry(Position primary, Position trackers) : pos(primary), t_pos(trackers) {
+    // pos.X = pos.Y = pos.heading = 0.0;
+    // t_pos.X = t_pos.Y = t_pos.heading = 0.0;
+    lastR = lastL = lastM = 0;
+    resetAngleSentinel = -PI;
+    resetEncoders = false;
+  }
+
   Position pos, t_pos;
   volatile bool resetEncoders = false;
   const float wheelWidth = WHEELWIDTH;//(8.75+1.25*2)*1.09;//distance betweenn L&Rtrackers on base (inch)
@@ -56,6 +59,7 @@ class PIDcontroller {
   volatile bool isReversed, isRunning;
   float Integral, Derivative, LastError;
   volatile float thresh, delayThresh, goal;
+
   //functions
   void setGoal(float g) {
     goal = g;
@@ -100,11 +104,15 @@ class PIDcontroller {
 };
 class Mechanism{
   public:
-  Mechanism(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) :
-  mots(m), encs(e), pid(p)
-  { }
+  Mechanism(int typ, std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) :
+  type(typ), mots(m), encs(e), pid(p)
+  {
+    slow= SLOW_NORMAL;
+  };
 
   //private:
+  int type;
+  volatile float slow;
   std::vector<pros::Motor> mots;
   std::vector<pros::ADIEncoder> encs;
   float lastVel = 0;
@@ -112,6 +120,12 @@ class Mechanism{
   public://functions
   class PIDcontroller pid;
   float velocity = 0;
+
+  void reset() {
+      for(const pros::Motor& m : mots){
+        m.tare_position();
+      }
+  }
 
   float getSensorVal(){
     if(!encs.empty()){
@@ -133,8 +147,31 @@ class Mechanism{
   void move(float power){
     // setPIDState(OFF);
     for(const pros::Motor& m : mots){//for each motor in mots
-      m.move(power / gSlow);
+      if (type == MEC_TRAY || type == MEC_INTAKE)
+        m.move(power / slow);
+      else
+        m.move(power);
     }
+  }
+
+  void toggleSlow() {
+    if(slow == SLOW_NORMAL) {
+      slow = SLOW_NORMAL;
+      if (type == MEC_INTAKE)
+        slow = SLOW_INTAKE;
+      else if (type == MEC_TRAY)
+        slow = SLOW_TRAY;
+    } else {
+      slow = SLOW_NORMAL;
+    }
+  }
+
+  void setSlow(float ratio) {
+    slow = ratio;
+  }
+
+  float getSlow() {
+    return slow;
   }
 
   // void movePID(float power){
@@ -157,12 +194,17 @@ class Mechanism{
   //   move(0);
   // }
 
-  void moveToPID(float goal, float cap = 127, float power = 127) {
+  void moveTo(float goal) {
+    setPIDGoal(goal);
+    setPIDState(ON);
+  }
+
+  void moveToUntil(float goal, int wait = 2000, float cap = 127) {
     int t = 0;
     setPIDGoal(goal);
     // setPIDState(ON);
     float currentDist = 0;
-    while(t < 2000){
+    while(t < wait){
       currentDist = getSensorVal();
       move(clamp(cap, -cap, pid.compute(currentDist)));
       delay(1);
@@ -293,53 +335,53 @@ class Mechanism{
   // }
 };
 
-class ChassisNoOdom : public Mechanism {
-public:
-    ChassisNoOdom(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
-    }
-
-    float yeet(float t){
-      float power = 2;
-      if(sign(t) > 0) return pow(t, power) / pow(127.0, power - 1.0);
-      return -pow(t, power) / pow(127.0, power - 1.0);
-    }
-
-    void driveLR(int powerR, int powerL) {//low level
-      powerL = clamp(127, -127, yeet(powerL));
-      powerR = clamp(127, -127, yeet(powerR));
-      mots[0].move(-powerR); // port 4 right
-      mots[1].move(powerL);//port 5 left
-      mots[2].move(powerL); //port 6 left
-      mots[3].move(-powerR);//port 7  right
-    }
-
-    void driveArcade(int powerFB, int powerLR) {
-      powerLR = clamp(50, -50, yeet(powerLR)) / gSlow;
-      powerFB = clamp(127, -127, yeet(powerFB)) / gSlow;
-      mots[0].move(powerLR - powerFB); //port 4 right
-      mots[1].move(powerLR + powerFB); //port 5 left
-      mots[2].move(powerLR + powerFB); //port 6 left
-      mots[3].move(powerLR - powerFB); //port 7 right
-    }
-
-    void turn(float goal, float power = 100, float cap = 127) {
-      int t = 0;
-      setPIDGoal(goal);
-      float state = setPIDState(OFF);
-      float currentDist = 0;
-      while(t < 2000){
-        currentDist = mots[0].get_position(); //use first motor as representation
-        float speed = clamp(cap, -cap, pid.compute(currentDist));
-        driveArcade(0, speed);
-        delay(1);
-        t++;
-      }
-      driveArcade(0,0);
-      setPIDState(state);
-    }
-
-};
-
+// class ChassisNoOdom : public Mechanism {
+// public:
+//     ChassisNoOdom(std::vector<pros::Motor> m, std::vector<pros::ADIEncoder>e, class PIDcontroller p) : Mechanism(m, e, p) {
+//     }
+//
+//     float yeet(float t){
+//       float power = 2;
+//       if(sign(t) > 0) return pow(t, power) / pow(127.0, power - 1.0);
+//       return -pow(t, power) / pow(127.0, power - 1.0);
+//     }
+//
+//     void driveLR(int powerR, int powerL) {//low level
+//       powerL = clamp(127, -127, yeet(powerL));
+//       powerR = clamp(127, -127, yeet(powerR));
+//       mots[0].move(-powerR); // port 4 right
+//       mots[1].move(powerL);//port 5 left
+//       mots[2].move(powerL); //port 6 left
+//       mots[3].move(-powerR);//port 7  right
+//     }
+//
+//     void driveArcade(int powerFB, int powerLR) {
+//       powerLR = clamp(50, -50, yeet(powerLR)) / gSlow;
+//       powerFB = clamp(127, -127, yeet(powerFB)) / gSlow;
+//       mots[0].move(powerLR - powerFB); //port 4 right
+//       mots[1].move(powerLR + powerFB); //port 5 left
+//       mots[2].move(powerLR + powerFB); //port 6 left
+//       mots[3].move(powerLR - powerFB); //port 7 right
+//     }
+//
+//     void turn(float goal, float power = 100, float cap = 127) {
+//       int t = 0;
+//       setPIDGoal(goal);
+//       float state = setPIDState(OFF);
+//       float currentDist = 0;
+//       while(t < 2000){
+//         currentDist = mots[0].get_position(); //use first motor as representation
+//         float speed = clamp(cap, -cap, pid.compute(currentDist));
+//         driveArcade(0, speed);
+//         delay(1);
+//         t++;
+//       }
+//       driveArcade(0,0);
+//       setPIDState(state);
+//     }
+//
+// };
+//
 class Chassis{
   public:
     Chassis(std::vector<pros::Motor> m, std::vector<PIDcontroller> p, Odometry o) :
@@ -351,6 +393,12 @@ class Chassis{
     float lastDriveVel = 0, lastRotVel = 0;
     float driveVel = 0, rotVel = 0;
     class Odometry odom;
+
+    void reset() {
+        for(const pros::Motor& m : mots){
+          m.tare_position();
+        }
+    }
 
     float yeet(float t){
       float power = 2;
@@ -372,8 +420,8 @@ class Chassis{
     // }
 
     void driveArcade(int powerFB, int powerLR) {
-      powerLR = clamp(50, -50, yeet(powerLR)) / gSlow;
-      powerFB = clamp(127, -127, yeet(powerFB)) / gSlow;
+      powerLR = clamp(50, -50, yeet(powerLR));
+      powerFB = clamp(127, -127, yeet(powerFB));
       mots[0].move(powerFB - powerLR); //port 4 right front
       mots[1].move(powerFB + powerLR); //port 5 left front
       mots[2].move(powerFB + powerLR); //port 6 left back
@@ -441,14 +489,14 @@ class Chassis{
       pids[DRIVE].isRunning = false;
     }
 
-    void fwdsUntilRelative(float amnt, int cap = 127){
+    void moveToUntil(float amnt, int wait = 2000, int cap = 127){
       const float initEncL = encL;
       const float initEncR = encR;
       int t = 0;
       pids[DRIVE].setGoal(amnt);
       pids[DRIVE].isRunning = true;
       float currentDist = 0;
-      while(t < 2000){
+      while(t < wait){
         currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
         fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
         delay(1);
@@ -494,10 +542,15 @@ class Chassis{
     void move(float power){
       // setPIDState(OFF);
       for(const pros::Motor& m : mots){//for each motor in mots
-        m.move(power / gSlow);
+        m.move(power);
       }
     }
-    
+
+    void moveTo(float amnt) {
+      setPIDGoal(amnt);
+      setPIDState(ON);
+    }
+
     float getSensorVal(){
       float sumMotEncoders = 0;//average of all MOTOR encoders in vector list
       for(const pros::Motor& m : mots){
@@ -565,7 +618,7 @@ class Chassis{
     //     phi = normAngle(phi + 180);//simple point turn (but backwards)
     //     dist = -dist;//simple drive forwards
     //   }
-    //   pids[DRIVE].setGoal(dist);       
+    //   pids[DRIVE].setGoal(dist);
     //   pids[DRIVE].isRunning = true;
     //   pids[ANGLE].setGoal(odom.pos.heading + phi);
     //   pids[ANGLE].isRunning = true;

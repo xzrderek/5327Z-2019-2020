@@ -88,6 +88,8 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define rightY       get_analog(E_CONTROLLER_ANALOG_RIGHT_Y)
 #define rightX       get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
 
+#define btnSpeedToggle btnRIGHT
+
 #define ON true
 #define OFF false
 #define DRIVE 0
@@ -104,8 +106,23 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define INTAKE2  9
 #define TRAY     2
 
-// TODO
 #define WHEELWIDTH 5.5
 #define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (3, 4, false), encLo (5, 6, false);
 
+#define LIFTTHRESHOLD_LOW (-800)
+#define LIFTTHRESHOLD_HIGH (-1200)
+#define LIFTLOW (-2400)
+#define LIFTMED (-3000)
+#define TRAYHIGH 1500
+#define TRAYLOW  400
+#define TRAYNEUTRAL (-1)
+
+#define MEC_BASE   1
+#define MEC_TRAY   2
+#define MEC_LIFT   3
+#define MEC_INTAKE 4
+
+#define SLOW_INTAKE 1.5
+#define SLOW_TRAY   2.0
+#define SLOW_NORMAL 1.0
 #endif

@@ -19,16 +19,19 @@ public:
 	Robot() :
 	//mechanisms
 	tray(
+		MEC_TRAY,
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(0.05, 0.0, 0.1, 10,  10, true, true)//PID
+		PIDcontroller(0.5, 0.0, 0.1, 10,  10, true, true)//PID
 	),
 	intake(
+		MEC_INTAKE,
 		{ Motor(INTAKE1), Motor(INTAKE2, true) }, //motors
 		{},//no sensors for intake, thus use indexer motor
 		PIDcontroller(1.0, 0.0, 2.0, 10,  10, true, true)//PID
 	),
 	lift(
+		MEC_LIFT,
 		{ Motor(LIFT)}, //motors
 		{},//no sensors for lift, thus use indexer motor
 		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, true)//PID
@@ -41,6 +44,7 @@ public:
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	),
 	trayToggle(
+		MEC_TRAY,
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
 		PIDcontroller(0.07, 1.0, 0.1, 100,  10, true, true)//PID
@@ -57,9 +61,9 @@ public:
 	// 	)
 	// )
 	{
-	// base.odom.pos.X = 0;
-	// base.odom.pos.Y = 0;
-	// base.odom.pos.heading = 90;
+	base.odom.pos.X = 0;
+	base.odom.pos.Y = 0;
+	base.odom.pos.heading = 90;
 	}
 
 	Mechanism tray;
@@ -69,6 +73,12 @@ public:
 	Chassis base; //ChassisNoOdom baseNoOdom;
 	float FWVelGoal = 0;
 
+	void reset() {
+		tray.reset();
+		intake.reset();
+		lift.reset();
+		base.reset();
+	}
 	// void indexerAdvance(int amntTicks = 100){//bring indexer ball up once (given number of encoder ticks)
 	// 	indexer.moveAmnt(amntTicks, 10);
 	// }

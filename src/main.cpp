@@ -7,14 +7,6 @@
 using namespace pros;
 using std::string;
 
-#define LIFTTHRESHOLD_LOW (-800)
-#define LIFTTHRESHOLD_HIGH (-1200)
-#define LIFTLOW (-2400)
-#define LIFTMED (-3000)
-#define TRAYTARGET 1500
-#define TRAYRESTING 0
-#define TRAYNEUTRAL (-1)
-
 // TODO
 DEFINE_TRACKERS
 
@@ -25,13 +17,13 @@ Robot rob = Robot();
 float encM, encL, encR;
 int baseLine;
 float LeftBAvg, RightBAvg;
-volatile int gSlow = 1;
 volatile int gAdjustTray = TRAYNEUTRAL;
 
 void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
   while(true){
+
     if(r->tray.getSensorVal() > 1000 && r->lift.getSensorVal() > -1000) {
       r->intake.setPIDState(OFF);
     }
@@ -41,35 +33,34 @@ void updatePIDs(void* param) {
     r->intake.PID();
     r->base.PID();
 
-    if(master.btnA) {
-      rob.tray.setPIDState(OFF);
-      rob.intake.setPIDState(OFF);
-      rob.trayToggle.moveToPID(3800);
-      rob.lift.moveToPID(700);
+    // if(master.btnA) {
+    //   rob.tray.moveTo(3800);
+    //   rob.lift.moveTo(700);
     //rob.intake.moveNew(20);
       // rob.lift.moveNew(20);
       // rob.tray.moveNew(20);
 
       // lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
-    }
+    // }
 
     if(gAdjustTray != TRAYNEUTRAL) {
-      rob.tray.setPIDState(OFF);
-      rob.trayToggle.moveToPID(gAdjustTray);
+      rob.tray.moveTo(gAdjustTray);
       gAdjustTray = TRAYNEUTRAL;
       // rob.tray.setPIDState(ON);
     }
+
     //debug
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
     // lcd::print(6, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
-    lcd::print(6, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
+    // lcd::print(6, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
 
     // lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     // lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     // lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
     // lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
 
+    master.set_text(1, 1, (string("Speed: ") + std::to_string(r->tray.getSlow())).c_str());
 
     // delay
     delay(delayAmnt);
@@ -83,7 +74,7 @@ void updatePIDs(void* param) {
 //     if(master.btnA) {
 //       rob.tray.setPIDState(OFF);
 //       rob.intake.setPIDState(OFF);
-//       rob.trayToggle.moveToPID(3800);
+//       rob.trayToggle.moveToUntil(3800);
 //       //rob.intake.moveNew(20);
 //       // rob.lift.moveNew(20);
 //       // rob.tray.moveNew(20);
@@ -105,22 +96,28 @@ void updatePIDs(void* param) {
 //   }
 // }
 
+void resetEncoders() {
+      encMo.reset();
+  	  encLo.reset();
+  	  encRo.reset();
+      encL = encM = encR = 0;
+}
+
 void updateTask(void* param){
   Robot* r = (Robot*) param;
-  ADILineSensor light (2);
+  // ADILineSensor light (2);
   while(true){
+
+    if(rob.base.odom.resetEncoders) {
+      resetEncoders();
+    }
+
     LeftBAvg = avg(r->base.mots[1].get_position(), r->base.mots[2].get_position());//1, 2
     RightBAvg = -avg(r->base.mots[0].get_position(), r->base.mots[3].get_position());//0, 3
     encM = encMo.get_value();
     encL = encLo.get_value();
     encR = encRo.get_value();
   	// baseLine = light.get_value();
-    if(rob.base.odom.resetEncoders) {
-      encMo.reset();
-  	  encLo.reset();
-  	  encRo.reset();
-    }
-
     lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
     lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
     lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
@@ -181,36 +178,6 @@ void disabled() {}
 void competition_initialize() {}
 
 /**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
-void doTrayToggle() {
-  rob.tray.setPIDState(OFF);
-  rob.intake.setPIDState(OFF);
-  rob.trayToggle.moveToPID(4100);
-  rob.lift.moveToPID(700);
-}
-
-void autonomous() {
-  Task PIDsUpdate(updatePIDs, &rob, "");
-
-  rob.tray.moveToPID(400);
-  rob.intake.move(127);
-  //rob.intake.setPIDState(ON);
-  rob.base.driveToPoint(100, 100);
-  rob.intake.move(0);
-  rob.base.driveToPoint(200, 300);
-  doTrayToggle();
-}
-
-/**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the operator
@@ -224,6 +191,10 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
+  rob.reset();
+  resetEncoders();
+
   rob.base.odom.resetEncoders = true;
 
   // Task sensorUpdates(updateSensor, &rob, "");
@@ -232,18 +203,43 @@ void opcontrol() {
   // Task trayToggleTask(trayToggleFunc, &rob, "");
   Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
 
-  int brake = 1;
-
   bool pressedIntake = false, pressedTray = false, pressedLift = false;
-  bool pressedBase = false, pressedSlow = false;
+  bool pressedBase = false, pressedSlow = false, pressedLiftTo = false, pressedLiftToLow = false;
 
   while (true) {
-    // slow
+
+    // lift to med
     if (master.btnDOWN) {
+      pressedLiftTo = true;
+    } else if (pressedLiftTo == true) {
+      rob.intake.setSlow(SLOW_INTAKE);
+      rob.lift.moveTo(LIFTMED);
+      gAdjustTray = TRAYHIGH;
+      pressedLiftTo = false;
+    }
+
+    // lift to low
+    if (master.btnB) {
+      pressedLiftToLow = true;
+    } else if (pressedLiftToLow == true) {
+      rob.intake.setSlow(SLOW_INTAKE);
+      rob.lift.moveTo(LIFTLOW);
+      gAdjustTray = TRAYHIGH;
+      pressedLiftToLow = false;
+    }
+
+    // slow button
+    //        INIT  Lift Height>Threshold  Height<Threshold   BTNL2 & Height>Threshold   BTNL2 & Height<Threshold
+    // intake  1         2(slow)             1                  Toggle (2->1)
+    // tray    1                                                                             Toggle
+    if (master.btnSpeedToggle) {
       pressedSlow = true;
     } else if (pressedSlow == true) {
-      if (gSlow == 1) gSlow = 2;
-      else gSlow = 1;
+      if (rob.lift.getSensorVal() < LIFTTHRESHOLD_LOW) {
+        rob.intake.toggleSlow();
+      } else {
+        rob.tray.toggleSlow();
+      }
       pressedSlow = false;
     }
 
@@ -264,9 +260,14 @@ void opcontrol() {
       rob.lift.setPIDState(OFF);
       pressedLift = true;
 
-      if (master.btnL1 && rob.lift.getSensorVal() < LIFTTHRESHOLD_LOW) {
-        gAdjustTray = TRAYTARGET;
+      if (rob.lift.getSensorVal() < LIFTTHRESHOLD_LOW) {
+        gAdjustTray = TRAYHIGH;
+        rob.intake.setSlow(SLOW_INTAKE);
+      } else {
+        gAdjustTray = TRAYLOW;
+        rob.intake.setSlow(SLOW_NORMAL);
       }
+
       // if (master.btnL2 && rob.lift.getSensorVal() > LIFTTHRESHOLD_HIGH) {
       //   gAdjustTray = TRAYNEUTRAL; // TRAYRESTING;
       // }
@@ -277,8 +278,8 @@ void opcontrol() {
     }
 
     // tray
-    rob.tray.simpleControl(master.btnX, master.btnB);
-    if (master.btnX || master.btnB) {
+    rob.tray.simpleControl(master.btnX, master.btnA);
+    if (master.btnX || master.btnA) {
       rob.tray.setPIDState(OFF);
       pressedTray = true;
     } else if (pressedTray) {
@@ -290,7 +291,6 @@ void opcontrol() {
     }
 
     // base
-
     rob.base.driveArcade(master.leftY, master.rightX);
     if (master.rightX != 0 || master.leftY != 0) {
       rob.base.setPIDState(OFF);
@@ -317,23 +317,19 @@ void opcontrol() {
     //   delay(300);
     // }
 
-    //TODO
-
+    //Debug Absolute Position
     if(master.btnUP){
-      rob.base.driveToPoint(10, 20);
+      rob.base.moveToUntil(400);
     }
 
-    if(master.btnRIGHT){
+    if(master.btnY){
       rob.base.odom.resetEncoders = true;
       rob.base.odom.resetAngleSentinel = 90;
+      rob.base.driveToPoint(10, 20);
     }
 
     if(master.btnLEFT){
       rob.base.turnUntil(90);
-    }
-
-    if(master.btnY){
-      rob.base.driveToPoint(-10, 10);
     }
 
     delay(2);

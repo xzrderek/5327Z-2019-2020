@@ -43,28 +43,28 @@ void calculatePosBASE(void* param){
         Odom->pos.X = Odom->t_pos.X + distToCenter * cos(radHeading);
         Odom->pos.Y = Odom->t_pos.Y + distToCenter * sin(radHeading) - distToCenter;
       }
-        //for resetting
-        if(Odom->resetEncoders){
-            Motor(LFront).tare_position();
-            Motor(LBack).tare_position();
-            Motor(RFront).tare_position();
-            Motor(RBack).tare_position();
-            encM = 0;
-            encL = 0;
-            encR = 0;
-            Odom->lastR = Odom->lastL = Odom->lastM = 0;
-            Odom->pos.X = Odom->pos.Y = 0;
-            Odom->t_pos.X = Odom->t_pos.Y = 0;
-            Odom->resetEncoders = false;//no need to reset again
-        }
+      //for resetting
+      if(Odom->resetEncoders){
+          Motor(LFront).tare_position();
+          Motor(LBack).tare_position();
+          Motor(RFront).tare_position();
+          Motor(RBack).tare_position();
+          encM = 0;
+          encL = 0;
+          encR = 0;
+          Odom->lastR = Odom->lastL = Odom->lastM = 0;
+          Odom->pos.X = Odom->pos.Y = 0;
+          Odom->t_pos.X = Odom->t_pos.Y = 0;
+          Odom->resetEncoders = false;//no need to reset again
+      }
 
-        if(Odom->resetAngleSentinel != SENTINEL){//new
-            Odom->t_pos.heading = Odom->resetAngleSentinel - 90;
-            Odom->pos.heading = Odom->resetAngleSentinel;//should reset the angle...
-            Odom->resetAngleSentinel = SENTINEL;
-        }
+      if(Odom->resetAngleSentinel != SENTINEL){//new
+          Odom->t_pos.heading = Odom->resetAngleSentinel - 90;
+          Odom->pos.heading = Odom->resetAngleSentinel;//should reset the angle...
+          Odom->resetAngleSentinel = SENTINEL;
+      }
 
-        //little delays
-        delay(1);
+      //little delays
+      delay(1);
     }
 }
