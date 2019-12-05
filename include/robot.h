@@ -42,13 +42,13 @@ public:
 		  PIDcontroller(3.5, 0.0, 0.5, 2.0,  10, true, true),
 		  PIDcontroller(0.1, 0.0, 0.05, 1.75,  10, true, true) },//PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
-	),
-	trayToggle(
-		MEC_TRAY,
-		{ Motor(TRAY) }, //motors
-		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(0.07, 1.0, 0.1, 100,  10, true, true)//PID
 	)
+	// trayToggle(
+	// 	MEC_TRAY,
+	// 	{ Motor(TRAY) }, //motors
+	// 	{},//no sensors for indexer, thus use indexer motor
+	// 	PIDcontroller(0.07, 1.0, 0.1, 100,  10, true, true)//PID
+	// )
 	// base(//motors
 	// 	{ Motor(RFront), Motor(LFront), Motor(LBack), Motor(RBack) },
 	// 	//drive PID, then angle PID, then curve
@@ -69,7 +69,7 @@ public:
 	Mechanism tray;
 	Mechanism intake;
 	Mechanism lift;
-	Mechanism trayToggle;
+	// Mechanism trayToggle;
 	Chassis base; //ChassisNoOdom baseNoOdom;
 	float FWVelGoal = 0;
 

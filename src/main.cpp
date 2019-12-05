@@ -285,7 +285,7 @@ void opcontrol() {
     } else if (pressedTray) {
         rob.tray.setPIDGoal(rob.tray.getSensorVal());
         rob.tray.setPIDState(ON);
-        rob.trayToggle.setPIDState(OFF);
+        // rob.trayToggle.setPIDState(OFF);
         rob.intake.setPIDState(OFF);
         pressedTray = false;
     }
@@ -318,19 +318,19 @@ void opcontrol() {
     // }
 
     //Debug Absolute Position
-    if(master.btnUP){
-      rob.base.moveToUntil(400);
-    }
+    // if(master.btnUP){
+    //   rob.base.moveToUntil(400);
+    // }
 
-    if(master.btnY){
-      rob.base.odom.resetEncoders = true;
-      rob.base.odom.resetAngleSentinel = 90;
-      rob.base.driveToPoint(10, 20);
-    }
+    // if(master.btnY){
+    //   rob.base.odom.resetEncoders = true;
+    //   rob.base.odom.resetAngleSentinel = 90;
+    //   rob.base.driveToPoint(10, 20);
+    // }
 
-    if(master.btnLEFT){
-      rob.base.turnUntil(90);
-    }
+    // if(master.btnLEFT){
+    //   rob.base.turnUntil(90);
+    // }
 
     delay(2);
   }
