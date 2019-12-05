@@ -28,6 +28,16 @@ void updatePIDs(void* param) {
       r->intake.setPIDState(OFF);
     }
 
+    if(rob.tray.getSensorVal() < 500) {
+      rob.tray.setPIDState(OFF);
+    }
+
+    if(gAdjustTray != TRAYNEUTRAL) {
+      rob.tray.moveTo(gAdjustTray);
+      gAdjustTray = TRAYNEUTRAL;
+      // rob.tray.setPIDState(ON);
+    }
+
     r->tray.PID();
     r->lift.PID();
     r->intake.PID();
@@ -42,12 +52,6 @@ void updatePIDs(void* param) {
 
       // lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
     // }
-
-    if(gAdjustTray != TRAYNEUTRAL) {
-      rob.tray.moveTo(gAdjustTray);
-      gAdjustTray = TRAYNEUTRAL;
-      // rob.tray.setPIDState(ON);
-    }
 
     //debug
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
@@ -249,8 +253,7 @@ void opcontrol() {
       rob.intake.setPIDState(OFF);
       pressedIntake = true;
     } else if (pressedIntake) {
-      rob.intake.setPIDGoal(rob.intake.getSensorVal());
-      rob.intake.setPIDState(ON);
+      rob.intake.moveTo(rob.intake.getSensorVal());
       pressedIntake = false;
     }
 
@@ -272,8 +275,7 @@ void opcontrol() {
       //   gAdjustTray = TRAYNEUTRAL; // TRAYRESTING;
       // }
     } else if (pressedLift) {
-        rob.lift.setPIDGoal(rob.lift.getSensorVal());
-        rob.lift.setPIDState(ON);
+        rob.lift.moveTo(rob.lift.getSensorVal());
         pressedLift = false;
     }
 
@@ -283,10 +285,9 @@ void opcontrol() {
       rob.tray.setPIDState(OFF);
       pressedTray = true;
     } else if (pressedTray) {
-        rob.tray.setPIDGoal(rob.tray.getSensorVal());
-        rob.tray.setPIDState(ON);
+        rob.tray.moveTo(rob.tray.getSensorVal());
         // rob.trayToggle.setPIDState(OFF);
-        rob.intake.setPIDState(OFF);
+        // rob.intake.setPIDState(OFF);
         pressedTray = false;
     }
 
@@ -296,8 +297,7 @@ void opcontrol() {
       rob.base.setPIDState(OFF);
       pressedBase = true;
     } else if (pressedBase) {
-      rob.base.setPIDGoal(rob.base.getSensorVal());
-      rob.base.setPIDState(ON);
+      rob.base.moveTo(rob.base.getSensorVal());
       pressedBase = false;
     }
 

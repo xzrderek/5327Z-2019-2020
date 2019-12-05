@@ -144,8 +144,9 @@ class Mechanism{
     }
   }
 
-  void move(float power){
+  void move(float power, float cap = 127){
     // setPIDState(OFF);
+    power = clamp(cap, -cap, power);
     for(const pros::Motor& m : mots){//for each motor in mots
       if (type == MEC_TRAY || type == MEC_INTAKE)
         m.move(power / slow);
@@ -539,10 +540,10 @@ class Chassis{
       return;
     }
 
-    void move(float power){
+    void move(float power, float cap = 127){
       // setPIDState(OFF);
       for(const pros::Motor& m : mots){//for each motor in mots
-        m.move(power);
+        m.move(clamp(cap, -cap, power));
       }
     }
 
