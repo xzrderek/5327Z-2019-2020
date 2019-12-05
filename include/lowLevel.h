@@ -444,34 +444,35 @@ class Chassis{
       driveArcade(0, power);
     }
 
-    float computeVel(){
+    // float computeVel(){
       //TODO: need it?
       // float currentSensor = avg(encoderDistInch(encoderL.get_value()), encoderDistInch(encoderR.get_value()));
       // const float delayAmnt = 20;
       // driveVel = ( currentSensor - lastDriveVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
       // lastDriveVel = currentSensor;
       // return driveVel;//converting inch/sec to ???
-      return 0;
-    }
+      // return 0;
+    // }
 
-    float computeRotVel(){
-      float currentSensor = odom.pos.heading;
-      const float delayAmnt = 20;
-      rotVel = ( currentSensor - lastRotVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
-      lastRotVel = currentSensor;
-      return rotVel;//converting degrees/sec to ???
-    }
+    // float computeRotVel(){
+    //   float currentSensor = odom.pos.heading;
+    //   const float delayAmnt = 20;
+    //   rotVel = ( currentSensor - lastRotVel) / (delayAmnt / 1000.0);///1000ms in 1 sec
+    //   lastRotVel = currentSensor;
+    //   return rotVel;//converting degrees/sec to ???
+    // }
 
-    void smoothDrive(float speed, const float angle, float sharpness = 1) {//drive base forwards
-      const float scalar = 2;//scalar for rotation
-      sharpness += 1;//parameter is from 0-1, do this addition to make sure it ranges from (1-2) [as explained below]
-      speed = clamp(127, -127, speed);
-      //for sharpness: 2 is direct point turn, 1 is turning off one side...
-      //	it basically is just how much the different sides can be reversed to increase tha sharpness of the curve
-      float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
-      driveArcade(speed, dirSkew);
-    }
+    // void smoothDrive(float speed, const float angle, float sharpness = 1) {//drive base forwards
+    //   const float scalar = 2;//scalar for rotation
+    //   sharpness += 1;//parameter is from 0-1, do this addition to make sure it ranges from (1-2) [as explained below]
+    //   speed = clamp(127, -127, speed);
+    //   //for sharpness: 2 is direct point turn, 1 is turning off one side...
+    //   //	it basically is just how much the different sides can be reversed to increase tha sharpness of the curve
+    //   float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
+    //   driveArcade(speed, dirSkew);
+    // }
 
+  private:
     //higher levels
     void fwdsUntil(float amnt, int cap = 127){
       float initX = odom.pos.X;
@@ -490,6 +491,7 @@ class Chassis{
       pids[DRIVE].isRunning = false;
     }
 
+  public:
     void moveToUntil(float amnt, int wait = 2000, int cap = 127){
       const float initEncL = encL;
       const float initEncR = encR;
@@ -507,11 +509,11 @@ class Chassis{
       pids[DRIVE].isRunning = false;
     }
 
-    void turnUntil(float amnt, int cap = 127){
+    void turnUntil(float amnt, int wait = 400, int cap = 127){
       int t = 0;
-      pids[ANGLE].setGoal(odom.pos.heading + amnt);
+      pids[ANGLE].setGoal(normAngle(odom.pos.heading + amnt));
       pids[ANGLE].isRunning = true;
-      while(t < 2000){
+      while(t < wait){
         pointTurn(pids[ANGLE].compute(odom.pos.heading, true));
         delay(1);
         t++;
@@ -519,9 +521,6 @@ class Chassis{
       pointTurn(0);
       pids[ANGLE].isRunning = false;
     }
-
-    // void turn(const float degrees, const int timeThresh = 400){
-    //  turnTo(normAngle(odom.pos.heading + degrees), timeThresh);//basically turns to the current + increment
 
     void driveToPoint(float x, float y, bool isBackwards = false){
       //first compute angle to goal
@@ -540,13 +539,7 @@ class Chassis{
       return;
     }
 
-    void move(float power, float cap = 127){
-      // setPIDState(OFF);
-      for(const pros::Motor& m : mots){//for each motor in mots
-        m.move(clamp(cap, -cap, power));
-      }
-    }
-
+    // use DRIVE2 PID, and can be parallel with other PIDs.
     void moveTo(float amnt) {
       setPIDGoal(amnt);
       setPIDState(ON);
@@ -565,7 +558,7 @@ class Chassis{
     }
 
     void PID(){//does a PID move HAVE TO SET PID GOAL BEFOREHAND
-      if(pids[DRIVE2].isRunning) move(pids[DRIVE2].compute(getSensorVal()));
+      if(pids[DRIVE2].isRunning) fwdsDrive(pids[DRIVE2].compute(getSensorVal()));
       return;
     }
 
