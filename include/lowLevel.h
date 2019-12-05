@@ -421,7 +421,7 @@ class Chassis{
     // }
 
     void driveArcade(int powerFB, int powerLR) {
-      powerLR = clamp(50, -50, yeet(powerLR));
+      powerLR = clamp(100, -100, yeet(powerLR));
       powerFB = clamp(127, -127, yeet(powerFB));
       mots[0].move(powerFB - powerLR); //port 4 right front
       mots[1].move(powerFB + powerLR); //port 5 left front

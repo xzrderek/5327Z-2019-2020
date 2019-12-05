@@ -28,20 +28,32 @@ void init()  {
 }
 
 void redSmall() {
-    // rob.lift.moveTo(-400);
-    // rob.tray.moveTo(600);
-    // rob.intake.move(-127);
+    rob.base.moveToUntil(12, 1000, 100);
+    rob.lift.moveTo(-1200);
+    rob.tray.moveTo(600);
+    delay(2000);
+    //rob.base.moveToUntil(12, 500, 100);
+    rob.lift.moveTo(-100);
+    delay(500);
+    //rob.intake.setPIDState(ON);
+    rob.intake.move(0);
+    rob.intake.move(-80);
+    rob.base.moveToUntil(32, 3300, 80);
+    //rob.intake.setPIDState(ON);
+
+    rob.intake.move(0);
+  //  rob.base.moveToUntil(-20, 2000, 80);
+    // rob.base.moveToUntil(3000, 500, 80);
+
+    // rob.base.turnUntil(90);
+    // rob.base.moveToUntil(1000, 4000, 70);
+    // //rob.intake.setPIDState(ON);
+    // rob.intake.moveToUntil(rob.intake.getSensorVal() - 200, 1000, 80);
+    // rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1500, 50);
+    // rob.tray.moveToUntil(4000);
+    // rob.base.move(80);
     // delay(2000);
 
-    // rob.intake.move(-80);
-    // rob.base.moveToUntil(4000, 5000, 80);
-    // rob.intake.move(0);
-    // rob.base.turnUntil(90);
-    // rob.base.moveToUntil(4000, 4000, 70);
-    rob.intake.setPIDState(ON);
-    rob.intake.moveToUntil(rob.intake.getSensorVal() - 200, 1000, 80);
-    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1500, 50);
-    rob.tray.moveToUntil(4000);
 
     // For reference only
     // rob.intake.move(127);

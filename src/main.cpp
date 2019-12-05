@@ -28,7 +28,7 @@ void updatePIDs(void* param) {
       r->intake.setPIDState(OFF);
     }
 
-    if(rob.tray.getSensorVal() < 500) {
+    if(rob.tray.getSensorVal() < 1000) {
       rob.tray.setPIDState(OFF);
     }
 
@@ -55,16 +55,16 @@ void updatePIDs(void* param) {
 
     //debug
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
-    lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    // lcd::print(6, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
+    //lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
+    lcd::print(6, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
     // lcd::print(6, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
 
-    // lcd::print(4, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
+    //lcd::print(6, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     // lcd::print(5, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
     // lcd::print(6, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
     // lcd::print(7, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
 
-    master.set_text(1, 1, (string("Speed: ") + std::to_string(r->tray.getSlow())).c_str());
+    //master.set_text(1, 1, (string("Speed: ") + std::to_string(r->tray.getSlow())).c_str());
 
     // delay
     delay(delayAmnt);
