@@ -29,14 +29,14 @@ void updatePIDs(void* param) {
       r->intake.setPIDState(OFF);
     }
 
-    if(rob.tray.getSensorVal() < 1000) {
-      rob.tray.setPIDState(OFF);
-    }
-
     if(gAdjustTray != TRAYNEUTRAL) {
       rob.tray.moveTo(gAdjustTray);
-      if (rob.tray.getSensorVal() >= 1000) {
+      if (abs(rob.tray.getSensorVal() - gAdjustTray) < 50) {
         gAdjustTray = TRAYNEUTRAL;
+      }
+    } else {
+      if(rob.tray.getSensorVal() < 1000) {
+        rob.tray.setPIDState(OFF);
       }
     }
     

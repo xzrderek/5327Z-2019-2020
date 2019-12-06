@@ -111,10 +111,10 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 
 #define LIFTTHRESHOLD_LOW (-800)
 #define LIFTTHRESHOLD_HIGH (-1200)
-#define LIFTLOW (-2400)
-#define LIFTMED (-3000)
+#define LIFTLOW (-2600)
+#define LIFTMED (-3100)
 #define TRAYHIGH 1500
-#define TRAYLOW  400
+#define TRAYLOW  500
 #define TRAYNEUTRAL (-1)
 
 #define MEC_BASE   1

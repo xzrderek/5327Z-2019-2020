@@ -36,23 +36,23 @@ void smallAuton(int color=1) {
     rob.base.moveToUntil(12, 1000, 100);
     rob.lift.moveTo(-1200);
     rob.tray.moveTo(600);
-    delay(1500);
+    delay(1200);
     rob.lift.moveTo(-100);
-    delay(400);
+    delay(300);
     rob.intake.move(0);
-    rob.intake.move(-70);
-    rob.base.moveToUntil(34, 3300, 80);
+    rob.intake.move(-90);
+    rob.base.moveToUntil(34, 2700, 100);
     rob.intake.move(0);
     // rob.base.moveToUntil(-20, 2000, 80);
-    rob.base.moveToUntil(-25, 1700, 80);
+    rob.base.moveToUntil(-25, 1300, 100);
     // rob.base.moveToUntil(-5, 1000, 80);
     // rob.base.moveToUntil(0, 50);
-    rob.base.turnUntil(color * 130, 1500, 100);
+    rob.base.turnUntil(color * 130, 1300, 110);
     rob.base.moveToUntil(16, 1500, 80);
 
     // rob.base.moveToUntil(1000, 4000, 70);
-    rob.intake.moveToUntil(rob.intake.getSensorVal() - 800, 1000, 80);
-    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1200, 50);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() - 800, 800, 80);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1000, 50);
     rob.tray.moveToUntil(4000);
     rob.base.moveToUntil(-15, 1700, 100);
     // 14800ms up to here
