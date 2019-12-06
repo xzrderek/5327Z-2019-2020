@@ -122,7 +122,7 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define MEC_LIFT   3
 #define MEC_INTAKE 4
 
-#define SLOW_INTAKE 1.5
-#define SLOW_TRAY   2.0
+#define SLOW_INTAKE 2.0
+#define SLOW_TRAY   2.5
 #define SLOW_NORMAL 1.0
 #endif
