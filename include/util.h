@@ -97,14 +97,14 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define DRIVE2 2
 
 //defining motor ports:
-#define RFront   13
-#define RBack    12
-#define LFront   19
-#define LBack    6
-#define LIFT     21
+#define RFront   12
+#define RBack    11
+#define LFront   16
+#define LBack    7
+#define LIFT     10
 #define INTAKE1  18
 #define INTAKE2  9
-#define TRAY     2
+#define TRAY     6
 
 #define WHEELWIDTH 5.5
 #define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (3, 4, false), encLo (5, 6, false);

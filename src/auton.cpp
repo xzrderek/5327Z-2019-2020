@@ -27,32 +27,36 @@ void init()  {
     Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
 }
 
-void redSmall() {
+/*
+1=RED
+-1=BLUE
+*/
+void smallAuton(int color=1) {
+    rob.intake.setPIDState(OFF);
     rob.base.moveToUntil(12, 1000, 100);
     rob.lift.moveTo(-1200);
     rob.tray.moveTo(600);
-    delay(2000);
-    //rob.base.moveToUntil(12, 500, 100);
+    delay(1500);
     rob.lift.moveTo(-100);
-    delay(500);
-    //rob.intake.setPIDState(ON);
+    delay(400);
     rob.intake.move(0);
-    rob.intake.move(-80);
-    rob.base.moveToUntil(32, 3300, 80);
-    //rob.intake.setPIDState(ON);
-
+    rob.intake.move(-70);
+    rob.base.moveToUntil(34, 3300, 80);
     rob.intake.move(0);
-  //  rob.base.moveToUntil(-20, 2000, 80);
-    // rob.base.moveToUntil(3000, 500, 80);
+    // rob.base.moveToUntil(-20, 2000, 80);
+    rob.base.moveToUntil(-25, 1700, 80);
+    // rob.base.moveToUntil(-5, 1000, 80);
+    // rob.base.moveToUntil(0, 50);
+    rob.base.turnUntil(color * 130, 1500, 100);
+    rob.base.moveToUntil(16, 1500, 80);
 
-    // rob.base.turnUntil(90);
     // rob.base.moveToUntil(1000, 4000, 70);
-    // //rob.intake.setPIDState(ON);
-    // rob.intake.moveToUntil(rob.intake.getSensorVal() - 200, 1000, 80);
-    // rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1500, 50);
-    // rob.tray.moveToUntil(4000);
-    // rob.base.move(80);
-    // delay(2000);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() - 800, 1000, 80);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 1200, 50);
+    rob.tray.moveToUntil(4000);
+    rob.base.moveToUntil(-15, 1700, 100);
+    // 14800ms up to here
+    delay(2000);
 
 
     // For reference only
@@ -61,6 +65,14 @@ void redSmall() {
     // rob.base.driveToPoint(100, 100);
     // rob.intake.move(0);
     // rob.base.driveToPoint(200, 300);
+}
+
+void redSmall() {
+  smallAuton(1);
+}
+
+void blueSmall() {
+  smallAuton(-1);
 }
 
 void autonomous() {

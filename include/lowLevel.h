@@ -514,7 +514,7 @@ class Chassis{
       pids[ANGLE].setGoal(normAngle(odom.pos.heading + amnt));
       pids[ANGLE].isRunning = true;
       while(t < wait){
-        pointTurn(pids[ANGLE].compute(odom.pos.heading, true));
+        pointTurn(clamp(cap, -cap, pids[ANGLE].compute(odom.pos.heading, true)));
         delay(1);
         t++;
       }

@@ -56,7 +56,7 @@ void updatePIDs(void* param) {
     //debug
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     //lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    lcd::print(6, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
+    lcd::print(6, (string("BBase: ") + std::to_string(r->base.getSensorVal())).c_str());
     // lcd::print(6, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
 
     //lcd::print(6, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
