@@ -20,6 +20,7 @@ float LeftBAvg, RightBAvg;
 volatile int gAdjustTray = TRAYNEUTRAL;
 
 void updatePIDs(void* param) {
+  gAdjustTray = TRAYNEUTRAL;
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
   while(true){
@@ -28,22 +29,21 @@ void updatePIDs(void* param) {
       r->intake.setPIDState(OFF);
     }
 
-    // if(rob.tray.getSensorVal() < 1000) {
-    //   rob.tray.setPIDState(OFF);
-    // }
+    if(rob.tray.getSensorVal() < 1000) {
+      rob.tray.setPIDState(OFF);
+    }
 
-    // if(gAdjustTray != TRAYNEUTRAL) {
-    //   if (rob.tray.getSensorVal() >= 1000) {
-    //     gAdjustTray = TRAYNEUTRAL;
-    //   } else {
-    //     rob.tray.moveTo(gAdjustTray);
-    //   }
-    // }
-    
     if(gAdjustTray != TRAYNEUTRAL) {
       rob.tray.moveTo(gAdjustTray);
-      gAdjustTray = TRAYNEUTRAL;
+      if (rob.tray.getSensorVal() >= 1000) {
+        gAdjustTray = TRAYNEUTRAL;
+      }
     }
+    
+    // if(gAdjustTray != TRAYNEUTRAL) {
+    //   rob.tray.moveTo(gAdjustTray);
+    //   gAdjustTray = TRAYNEUTRAL;
+    // }
 
     r->tray.PID();
     r->lift.PID();
@@ -63,7 +63,7 @@ void updatePIDs(void* param) {
     //debug
     lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
     lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    lcd::print(5, (string("BBase: ") + std::to_string(r->base.getSensorVal())).c_str());
+    lcd::print(5, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
     lcd::print(4, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
 
     lcd::print(3, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
