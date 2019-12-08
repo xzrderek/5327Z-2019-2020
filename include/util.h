@@ -99,7 +99,7 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 //defining motor ports:
 #define RFront   12
 #define RBack    11
-#define LFront   16
+#define LFront   14
 #define LBack    7
 #define LIFT     10
 #define INTAKE1  18
@@ -114,8 +114,18 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define LIFTLOW (-2600)
 #define LIFTMED (-3100)
 #define TRAYHIGH 1500
-#define TRAYLOW  500
+#define TRAYLOW  600
 #define TRAYNEUTRAL (-1)
+
+// #define LIFTTHRESHOLD_LOW (-800)
+// //#define LIFTTHRESHOLD_HIGH (-1200)
+// #define LIFTLOW (-2300)
+// #define LIFTMED (-3000)
+// #define TRAYHIGH 700
+// #define TRAYLOW  0
+// #define TRAYNEUTRAL (-1)
+// #define TRAYNOPID 500
+
 
 #define MEC_BASE   1
 #define MEC_TRAY   2
