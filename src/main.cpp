@@ -24,8 +24,10 @@ void updatePIDs(void* param) {
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
   while(true){
+    //tray value usually 1000
+    //if(r->tray.getSensorVal() > 1000 && r->lift.getSensorVal() > -1000) {
 
-    if(r->tray.getSensorVal() > 1000 && r->lift.getSensorVal() > -1000) {
+    if(r->tray.getSensorVal() > 500 && r->lift.getSensorVal() > -1000) {
       r->intake.setPIDState(OFF);
     }
 
@@ -57,19 +59,19 @@ void updatePIDs(void* param) {
       // rob.lift.moveNew(20);
       // rob.tray.moveNew(20);
 
-      // lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
-    // }
+    //  lcd::print(7, (string("traytoggle kd: ") + std::to_string(r->trayToggle.pid.kD)).c_str());
+    //}
 
     //debug
-    // lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
-    // lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
-    // lcd::print(5, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
-    // lcd::print(4, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
-    //
-    // lcd::print(3, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
-    // lcd::print(2, (string("Lift Goal: ") + std::to_string(r->lift.getPIDGoal())).c_str());
-    // lcd::print(1, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
-    // lcd::print(0, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
+    lcd::print(7, (string("Lift: ") + std::to_string(r->lift.getSensorVal())).c_str());
+    lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
+    lcd::print(5, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
+    lcd::print(4, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
+
+    lcd::print(3, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
+    lcd::print(2, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
+    lcd::print(1, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
+    lcd::print(0, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
 
     //master.set_text(1, 1, (string("Speed: ") + std::to_string(r->tray.getSlow())).c_str());
 
@@ -129,13 +131,13 @@ void updateTask(void* param){
     encL = encLo.get_value();
     encR = encRo.get_value();
   	// baseLine = light.get_value();
-    lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
-    lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
-    lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
-    lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
-    lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
-    lcd::print(5, (string("MEnc : ") + std::to_string( encM )).c_str());
-    lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
+    // lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
+    // lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
+    // lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
+    // lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
+    // lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
+    // lcd::print(5, (string("MEnc : ") + std::to_string( encM )).c_str());
+    // lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
 
     delay(2);
   }

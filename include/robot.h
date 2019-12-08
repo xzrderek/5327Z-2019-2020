@@ -39,7 +39,7 @@ public:
 	base(
 		{ Motor(RFront), Motor(LFront, true), Motor(LBack), Motor(RBack, true) }, //motors
 		{ PIDcontroller(12, 0.0, 0.05, 1.75, 10, true, true),
-		  PIDcontroller(3.5, 0.0, 0.5, 2.0,  10, true, true),
+		  PIDcontroller(0.5, 0.0, 0.0, 10.0,  10, true, true),
 		  PIDcontroller(0.1, 0.0, 0.05, 1.75,  10, true, true) },//PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	)

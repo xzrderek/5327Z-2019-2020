@@ -98,7 +98,7 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 
 //defining motor ports:
 #define RFront   12
-#define RBack    11
+#define RBack    13
 #define LFront   14
 #define LBack    7
 #define LIFT     10
@@ -109,22 +109,25 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define WHEELWIDTH 5.5
 #define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (3, 4, false), encLo (5, 6, false);
 
+//with backauton
 #define LIFTTHRESHOLD_LOW (-800)
 #define LIFTTHRESHOLD_HIGH (-1200)
 #define LIFTLOW (-2600)
 #define LIFTMED (-3100)
 #define TRAYHIGH 1500
-#define TRAYLOW  600
+#define TRAYLOW  800
 #define TRAYNEUTRAL (-1)
 
+//
+// //with frontauton
 // #define LIFTTHRESHOLD_LOW (-800)
 // //#define LIFTTHRESHOLD_HIGH (-1200)
 // #define LIFTLOW (-2300)
 // #define LIFTMED (-3000)
-// #define TRAYHIGH 700
+// #define TRAYHIGH 800
 // #define TRAYLOW  0
 // #define TRAYNEUTRAL (-1)
-// #define TRAYNOPID 500
+// //#define TRAYNOPID 500
 
 
 #define MEC_BASE   1
