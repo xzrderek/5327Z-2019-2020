@@ -127,6 +127,12 @@ class Mechanism{
       }
   }
 
+  void set_zero_position() {
+      for(const pros::Motor& m : mots){
+        m.set_zero_position(m.get_position());
+      }
+  }
+
   float getSensorVal(){
     if(!encs.empty()){
       float sumEncoders = 0;//average of all encoders in vector list

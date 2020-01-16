@@ -37,9 +37,9 @@ public:
 		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, true)//PID
 	),
 	base(
-		{ Motor(RFront), Motor(LFront, true), Motor(LBack), Motor(RBack, true) }, //motors
-		{ PIDcontroller(12, 0.0, 0.05, 1.75, 10, true, true),
-		  PIDcontroller(0.5, 0.0, 0.0, 10.0,  10, true, true),
+		{ Motor(RFront, true), Motor(LFront), Motor(LBack), Motor(RBack, true) }, //motors
+		{ PIDcontroller(12, 0.0, 0.05, 1.75, 10, true, true), //forward back
+		  PIDcontroller(3.5, 0.0, 1.0, 10,  10, true, true), //turnuntil angle
 		  PIDcontroller(0.1, 0.0, 0.05, 1.75,  10, true, true) },//PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	)
