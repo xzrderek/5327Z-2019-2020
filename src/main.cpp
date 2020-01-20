@@ -136,10 +136,14 @@ void updateTask(void* param){
     lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
     lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
     lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
-    lcd::print(3, (string("LEnc: ") + std::to_string( encL )).c_str());
-    lcd::print(4, (string("REnc: ") + std::to_string( encR )).c_str());
-    lcd::print(5, (string("MEncoder : ") + std::to_string( encM )).c_str());
-    lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
+    lcd::print(3, (string("kP: ") + std::to_string( rob.base.pids[ANGLE].kP)).c_str());
+    lcd::print(4, (string("kI: ") + std::to_string( rob.base.pids[ANGLE].kI)).c_str());
+    lcd::print(5, (string("kD: ") + std::to_string( rob.base.pids[ANGLE].kD)).c_str());
+
+    // lcd::print(3, (string("LEnc: ") + std::to_string( encoderDistInch(encL) )).c_str());
+    // lcd::print(4, (string("REnc: ") + std::to_string( encoderDistInch(encR) )).c_str());
+    // lcd::print(5, (string("MEncoder : ") + std::to_string( encM )).c_str());
+    // lcd::print(6, (string("Line : ") + std::to_string( baseLine )).c_str());
 
     delay(2);
   }

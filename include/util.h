@@ -92,9 +92,9 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 
 #define ON true
 #define OFF false
-#define DRIVE 0
-#define ANGLE 1
-#define DRIVE2 2
+#define DRIVE 0 //AUTON: back n forth
+#define ANGLE 1 //AUTON: heading
+#define DRIVE2 2 //DRIVER
 
 //defining motor ports:
 #define RFront   2

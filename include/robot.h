@@ -22,25 +22,25 @@ public:
 		MEC_TRAY,
 		{ Motor(TRAY) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
-		PIDcontroller(0.5, 0.0, 0.1, 10,  10, true, true)//PID
+		PIDcontroller(0.5, 0.0, 0.1, 10,  10, true, false)//PID
 	),
 	intake(
 		MEC_INTAKE,
 		{ Motor(INTAKE1), Motor(INTAKE2, true) }, //motors
 		{},//no sensors for intake, thus use indexer motor
-		PIDcontroller(1.0, 0.0, 2.0, 10,  10, true, true)//PID
+		PIDcontroller(1.0, 0.0, 2.0, 10,  10, true, false)//PID
 	),
 	lift(
 		MEC_LIFT,
 		{ Motor(LIFT)}, //motors
 		{},//no sensors for lift, thus use indexer motor
-		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, true)//PID
+		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, false)//PID
 	),
 	base(
 		{ Motor(RFront, true), Motor(LFront), Motor(LBack), Motor(RBack, true) }, //motors
-		{ PIDcontroller(12, 0.0, 0.05, 1.75, 10, true, true), //forward back
-		  PIDcontroller(3.5, 0.0, 1.0, 10,  10, true, true), //turnuntil angle
-		  PIDcontroller(0.1, 0.0, 0.05, 1.75,  10, true, true) },//PID
+		{ PIDcontroller(40, 0.0, 2.0, 0.5, 10, true, false), //forward back
+		  PIDcontroller(2, 0.0, 0.5, 5.0, 10, true, false), //turnuntil angle, if too slow, increase kp, lower = slower power
+		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false) }, //opdrive PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	)
 	// trayToggle(

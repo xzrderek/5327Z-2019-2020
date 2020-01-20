@@ -60,17 +60,32 @@ class PIDcontroller {
   float Integral, Derivative, LastError;
   volatile float thresh, delayThresh, goal;
 
+  void setPID(float p, float i=0, float d=0) {
+    kP = p;
+    kI = i;
+    kD = d;
+  }
+
   //functions
   void setGoal(float g) {
     goal = g;
+
+    //reset
+    Integral = 0;
+    Derivative = 0;
+    LastError = 0;
+    isRunning = true;
+
     // if (abs(g) < 127) {
     //   ratio = 127 / abs(g);
     //   goal = g * ratio;
     // }
   }
+
   float getGoal() {
     return goal;
   }
+
   float compute(float current, bool isAngle = false) {
     if(true){
       current = current * ratio;
@@ -405,6 +420,15 @@ class Chassis{
         for(const pros::Motor& m : mots){
           m.tare_position();
         }
+
+        odom.pos.X = 0;
+	      odom.pos.Y = 0;
+	      odom.pos.heading = 90;
+
+    }
+
+    void setPID(int controller, float p, float i=0, float d=0) {
+      pids[controller].setPID(p, i, d);
     }
 
     float yeet(float t){

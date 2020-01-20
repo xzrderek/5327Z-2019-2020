@@ -193,8 +193,12 @@ void CV1(int color=1) {
 }
 
 void test() {
+  rob.base.setPID(ANGLE, 5, 0, 4);
+  rob.base.turnUntil(30, 10000, 70);
+  rob.base.moveToUntil(12, 10000, 100);
+  rob.base.setPID(ANGLE, 1.8, 0, 4);
+  rob.base.turnUntil(90, 10000, 80);
 
-  rob.base.turnUntil(120, 1000, 100);
 }
 
 void autonomous() {
