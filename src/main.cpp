@@ -23,6 +23,8 @@ void updatePIDs(void* param) {
   gAdjustTray = TRAYNEUTRAL;
   Robot* r = (Robot*) param;
   const float delayAmnt = 2;
+  //temp
+  bool intakeZeroed = false;
   while(true){
     //tray value usually 1000
     //if(r->tray.getSensorVal() > 1000 && r->lift.getSensorVal() > -1000) {
@@ -31,9 +33,18 @@ void updatePIDs(void* param) {
     if(r->tray.getSensorVal() > 500 && r->lift.getSensorVal() > -1000) {
       //r->intake.setPIDState(OFF);
       rob.intake.setSlow(SLOW_INTAKE);
-      rob.intake.setPID(0.03, 0.0, 0.0);
+      // rob.intake.setPID(0.03, 0.0, 0.0);
+
+      // // if(rob.tray.get_actual_velocity == 0){
+      //   intakeZeroed = true;
+      //   if (intakeZeroed) {
+      //     rob.intake.set_zero_position();
+      //   }
+      //   rob.intake.moveTo(rob.tray.getSensorVal()/3);
+      // // }
     }
     else {
+      // intakeZeroed = false;
       rob.intake.setSlow(SLOW_NORMAL);
       rob.intake.setPID(1.0, 0.0, 2.0);
     }
@@ -72,13 +83,13 @@ void updatePIDs(void* param) {
 
     //debug
     // lcd::print(7, (string("Lift2: ") + std::to_string(r->lift.getSensorVal())).c_str());
-    // lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
+    lcd::print(6, (string("Intake: ") + std::to_string(r->intake.getSensorVal())).c_str());
     // lcd::print(5, (string("Base: ") + std::to_string(r->base.getSensorVal())).c_str());
-    // lcd::print(4, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
+    lcd::print(4, (string("Tray: ") + std::to_string(r->tray.getSensorVal())).c_str());
     //
     // lcd::print(3, (string("Tray Goal: ") + std::to_string(r->tray.getPIDGoal())).c_str());
     // lcd::print(2, (string("Base Goal: ") + std::to_string(r->base.getPIDGoal())).c_str());
-    // lcd::print(1, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
+    lcd::print(1, (string("Intake Goal: ") + std::to_string(r->intake.getPIDGoal())).c_str());
     // lcd::print(0, (string("gAdjustTray: ") + std::to_string(gAdjustTray)).c_str());
 
     //master.set_text(1, 1, (string("Speed: ") + std::to_string(r->tray.getSlow())).c_str());
@@ -142,9 +153,9 @@ void updateTask(void* param){
     // lcd::print(0, (string("Pos X: ") + std::to_string( rob.base.odom.pos.X)).c_str());
     // lcd::print(1, (string("Pos Y: ") + std::to_string( rob.base.odom.pos.Y)).c_str());
     // lcd::print(2, (string("Heading: ") + std::to_string( rob.base.odom.pos.heading)).c_str());
-    lcd::print(3, (string("kP: ") + std::to_string( rob.intake.pid.kP)).c_str());
-    lcd::print(4, (string("kI: ") + std::to_string( rob.intake.pid.kI)).c_str());
-    lcd::print(5, (string("kD: ") + std::to_string( rob.intake.pid.kD)).c_str());
+    // lcd::print(3, (string("kP: ") + std::to_string( rob.intake.pid.kP)).c_str());
+    // lcd::print(4, (string("kI: ") + std::to_string( rob.intake.pid.kI)).c_str());
+    // lcd::print(5, (string("kD: ") + std::to_string( rob.intake.pid.kD)).c_str());
 
     // lcd::print(3, (string("LEnc: ") + std::to_string( encoderDistInch(encL) )).c_str());
     // lcd::print(4, (string("REnc: ") + std::to_string( encoderDistInch(encR) )).c_str());
@@ -228,7 +239,7 @@ void opcontrol() {
   // Task trayToggleTask(trayToggleFunc, &rob, "");
   Task odometryCalculations(calculatePosBASE, &rob.base.odom, "");
 
-  bool pressedIntake = false, pressedTray = false, pressedLift = false, pressedReset = false;
+  bool pressedIntake = false, pressedTray = false, pressedLift = false, pressedReset = false, intakeZeroed = false;
   bool pressedBase = false, pressedSlow = false, pressedLiftTo = false, pressedLiftToLow = false;
 
   while (true) {
@@ -237,22 +248,31 @@ void opcontrol() {
     if (master.btnDOWN) {
       pressedLiftTo = true;
     } else if (pressedLiftTo == true) {
-      rob.intake.setSlow(SLOW_INTAKE);
-      rob.lift.moveTo(LIFTMED);
-      gAdjustTray = TRAYHIGH;
+      if (master.btnY) { //with shift
+        rob.lift.moveTo(LIFTMED);
+        rob.intake.moveTo(rob.intake.getSensorVal() + 1000);
+      } else {
+        rob.intake.setSlow(SLOW_INTAKE); 
+        rob.lift.moveTo(LIFTMED);
+        gAdjustTray = TRAYHIGH;
+      }
       pressedLiftTo = false;
-    }
 
+    }
     // lift to low
     if (master.btnB) {
       pressedLiftToLow = true;
     } else if (pressedLiftToLow == true) {
-      rob.intake.setSlow(SLOW_INTAKE);
-      rob.lift.moveTo(LIFTLOW);
-      gAdjustTray = TRAYHIGH;
+      if (master.btnY) { //with shift
+        rob.lift.moveTo(LIFTLOW);
+        rob.intake.moveTo(rob.intake.getSensorVal() + 1000);
+      } else {
+        rob.intake.setSlow(SLOW_INTAKE);
+        rob.lift.moveTo(LIFTLOW);
+        gAdjustTray = TRAYHIGH;
+      }
       pressedLiftToLow = false;
     }
-
     // slow button
     //        INIT  Lift Height>Threshold  Height<Threshold   BTNL2 & Height>Threshold   BTNL2 & Height<Threshold
     // intake  1         2(slow)             1                  Toggle (2->1)
