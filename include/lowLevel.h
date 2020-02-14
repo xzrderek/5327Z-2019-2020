@@ -202,12 +202,12 @@ class Mechanism{
   //   }
   // }
 
-  // void moveVel(float vel){
-  //   setPIDState(OFF);
-  //   for(const pros::Motor& m : mots){//for each motor in mots
-  //     m.move_velocity(vel);
-  //   }
-  // }
+  void moveVel(float vel){
+    setPIDState(OFF);
+    for(const pros::Motor& m : mots){//for each motor in mots
+      m.move_velocity(vel);
+    }
+  }
 
   // void moveTo(float goal, float thresh, float power = 127){//simple encoder move
   //   while(abs(getSensorVal() - goal) > thresh){
@@ -239,6 +239,10 @@ class Mechanism{
 
   void simpleControl(int buttonUp, int buttonDown, int power = 127){
     move(buttonUp*power - buttonDown*power);//simple up down control with 2 buttons (perf for indexer)
+  }
+
+  void setPID(float p, float i=0, float d=0) {
+    pid.setPID(p, i, d);
   }
 
   // void skrrt(int vel){
@@ -492,15 +496,15 @@ class Chassis{
     //   return rotVel;//converting degrees/sec to ???
     // }
 
-    // void smoothDrive(float speed, const float angle, float sharpness = 1) {//drive base forwards
-    //   const float scalar = 2;//scalar for rotation
-    //   sharpness += 1;//parameter is from 0-1, do this addition to make sure it ranges from (1-2) [as explained below]
-    //   speed = clamp(127, -127, speed);
-    //   //for sharpness: 2 is direct point turn, 1 is turning off one side...
-    //   //	it basically is just how much the different sides can be reversed to increase tha sharpness of the curve
-    //   float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
-    //   driveArcade(speed, dirSkew);
-    // }
+    void smoothDrive(float speed, const float angle, float sharpness = 1) {//drive base forwards
+      const float scalar = 2;//scalar for rotation
+      sharpness += 1;//parameter is from 0-1, do this addition to make sure it ranges from (1-2) [as explained below]
+      speed = clamp(127, -127, speed);
+      //for sharpness: 2 is direct point turn, 1 is turning off one side...
+      //	it basically is just how much the different sides can be reversed to increase tha sharpness of the curve
+      float dirSkew = limUpTo(127 * sharpness, scalar*normAngle(odom.pos.heading - angle));
+      driveArcade(speed, dirSkew);
+    }
 
   private:
     //higher levels
