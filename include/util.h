@@ -102,7 +102,7 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define LFront   10
 #define LBack    20
 #define LIFT     13
-#define INTAKE1  11
+#define INTAKE1  15
 #define INTAKE2  17
 #define TRAY     9
 
@@ -112,8 +112,8 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 //with backauton
 #define LIFTTHRESHOLD_LOW (-800)
 #define LIFTTHRESHOLD_HIGH (-1200)
-#define LIFTLOW (-2300)
-#define LIFTMED (-3000)
+#define LIFTLOW (-2800)
+#define LIFTMED (-3200)
 #define TRAYHIGH 1500
 #define TRAYLOW  800
 #define TRAYNEUTRAL (-1)

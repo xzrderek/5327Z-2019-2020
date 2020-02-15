@@ -206,7 +206,12 @@ void test() {
   // rob.intake.move(63);
   // rob.tray.moveToUntil(4000);
   // rob.base.moveToUntil(-15, 1700, 100);
-  rob.intake.move(-127);
+  // rob.intake.move(-127);
+      rob.base.moveToUntil(11, 10000, 100);
+    // rob.base.moveToUntil(34, 3000, 80);
+    // rob.base.moveToUntil(-24, 1200, 100);
+    // rob.base.turnUntil(120, 1300, 110);
+
 
 }
 
@@ -214,6 +219,8 @@ void CV2(int color=1) {
     rob.intake.setPIDState(OFF);
     rob.tray.setPIDState(ON);
     rob.lift.setPIDState(ON);
+    rob.base.setPID(ANGLE, 2, 0, 0.5);
+    rob.base.setPID(DRIVE, 40, 0, 2);
     //rob.intake.setPIDState(OFF);
     rob.base.moveToUntil(12, 1000, 100);
     //rob.lift.moveTo(-1400);
@@ -238,8 +245,9 @@ void CV2(int color=1) {
 
     // rob.base.moveToUntil(1000, 4000, 70);
     //rob.intake.moveToUntil(rob.intake.getSensorVal() - 800, 1000, 70);
-    // rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 500, 200);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 5000, 100);
     // rob.intake.move(0);
+
     rob.intake.move(50);
 
     rob.tray.moveToUntil(4000, 2500, 80);
@@ -249,10 +257,88 @@ void CV2(int color=1) {
     delay(2000);
   }
 
+void google(int color=1) {
+    rob.intake.setPIDState(OFF);
+    rob.tray.setPIDState(ON);
+    rob.lift.setPIDState(ON);
+    rob.base.setPID(ANGLE, 2, 0, 0.5);
+    rob.base.setPID(DRIVE, 40, 0, 2);
+    //rob.intake.setPIDState(OFF);
+    rob.base.moveToUntil(12, 1000, 100);
+    //rob.lift.moveTo(-1400);
+    rob.tray.moveToUntil(1000, 1200, 127);
+    rob.tray.setPIDState(OFF);
+    rob.lift.moveTo(100);
+    delay(1000);
+    rob.intake.setSlow(SLOW_NORMAL);
+    rob.intake.move(0);
+    rob.intake.move(-127);
+    rob.base.moveToUntil(34, 3000, 80);
+    //rob.intake.move(0);
+    // rob.base.moveToUntil(-20, 2000, 80);
+    rob.base.moveToUntil(-24, 1200, 100);
+    // rob.base.moveToUntil(-5, 1000, 80);
+    // rob.base.moveToUntil(0, 50);
+    //rob.intake.move(0);
+    rob.base.turnUntil(color * 120, 1300, 110);
+    rob.base.moveToUntil(15, 1700, 100);
+
+    rob.intake.move(0);
+
+    // rob.base.moveToUntil(1000, 4000, 70);
+    //rob.intake.moveToUntil(rob.intake.getSensorVal() - 800, 1000, 70);
+    rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 5000, 100);
+    // rob.intake.move(0);
+
+    rob.intake.move(50);
+
+    rob.tray.moveToUntil(4000, 2500, 80);
+    rob.base.moveToUntil(-15, 1700, 100);
+    //rob.intake.move(-63);
+    // 14800ms up to here
+    delay(2000);
+  }
+
+
+void skills() {
+  rob.intake.setPIDState(OFF);
+  rob.tray.setPIDState(ON);
+  rob.lift.setPIDState(ON);
+  //rob.intake.setPIDState(OFF);
+  rob.base.moveToUntil(12, 1000, 100);
+  //rob.lift.moveTo(-1400);
+  rob.tray.moveToUntil(1000, 1200, 127);
+  rob.tray.setPIDState(OFF);
+  rob.lift.moveTo(100);
+  delay(1000);
+  rob.intake.setSlow(SLOW_NORMAL);
+  rob.intake.move(0);
+  rob.intake.move(-127);
+  rob.base.moveToUntil(120, 9000, 80);
+  rob.base.moveToUntil(-15, 3000, 80);
+  rob.base.setPID(ANGLE, 6, 0, 4); //new angle
+  rob.base.turnUntil(-40, 2000, 80);
+  rob.base.moveToUntil(20, 4000, 80);
+}
+
+void deploy() {
+  rob.lift.moveTo(100);
+  rob.intake.setPIDState(ON);
+  rob.intake.moveToUntil(rob.intake.getSensorVal() + 600, 2000, 50);
+  rob.tray.moveToUntil(2000, 1300, 127);
+  rob.intake.move(-60);
+  rob.tray.moveToUntil(3700, 3000, 40);
+  rob.base.moveToUntil(2, 200, 80);
+  rob.base.moveToUntil(-10, 10000, 60);
+
+}
+
 void autonomous() {
-    init();
-    // test();
+    // init();
+    test();
     // bigAuton();
-    CV2(-1); //blue
+    // CV2(-1); //blue
     // CV2(1); //red
+    // skills();
+    // deploy();
 }
