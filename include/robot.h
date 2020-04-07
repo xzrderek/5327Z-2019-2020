@@ -20,7 +20,7 @@ public:
 	//mechanisms
 	tray(
 		MEC_TRAY,
-		{ Motor(TRAY) }, //motors
+		{ Motor(TRAY, true) }, //motors
 		{},//no sensors for indexer, thus use indexer motor
 		PIDcontroller(0.5, 0.0, 0.1, 10,  10, true, false)//PID
 	),

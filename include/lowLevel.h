@@ -446,8 +446,8 @@ class Chassis{
     }
 
     // void driveLR(int powerR, int powerL){//low level
-    //   powerL = clamp(127, -127, yeet(powerL)) / gSlow;
-    //   powerR = clamp(127, -127, yeet(powerR)) / gSlow;
+    //   powerL = clamp(127, -127, yeet(powerL));
+    //   powerR = clamp(127, -127, yeet(powerR));
     //   mots[0].move(-powerR); // port 4 right
     //   mots[1].move(powerL);//port 5 left
     //   mots[2].move(powerL); //port 6 left

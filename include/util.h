@@ -97,38 +97,36 @@ inline bool isWithinAngleBounds(const float current, const float goal, const flo
 #define DRIVE2 2
 
 //defining motor ports:
-#define RFront   2
-#define RBack    12
-#define LFront   10
-#define LBack    20
-#define LIFT     13
-#define INTAKE1  15
-#define INTAKE2  17
-#define TRAY     9
+#define RFront   9
+#define RBack    1
+#define LFront   8
+#define LBack    17
+#define LIFT     7
+#define INTAKE1  3
+#define INTAKE2  13
+#define TRAY     10
 
-#define WHEELWIDTH 5.5
-#define DEFINE_TRACKERS ADIEncoder encMo (7, 8, false), encRo (5, 6, false), encLo (1, 2, false);
+#define WHEELWIDTH 3.5
+#define DEFINE_TRACKERS ADIEncoder encMo (3, 4, true), encRo (7, 8, false), encLo (5, 6, false);
 
 //with backauton
 #define LIFTTHRESHOLD_LOW (-800)
 #define LIFTTHRESHOLD_HIGH (-1200)
-#define LIFTLOW (-2800)
-#define LIFTMED (-3200)
+#define LIFTLOW (-1500)
+#define LIFTMED (-2000)
 #define TRAYHIGH 1500
 #define TRAYLOW  800
 #define TRAYNEUTRAL (-1)
 
-//
-// //with frontauton
+// with frontauton
 // #define LIFTTHRESHOLD_LOW (-800)
-// //#define LIFTTHRESHOLD_HIGH (-1200)
+// #define LIFTTHRESHOLD_HIGH (-1200)
 // #define LIFTLOW (-2300)
 // #define LIFTMED (-3000)
 // #define TRAYHIGH 800
 // #define TRAYLOW  0
 // #define TRAYNEUTRAL (-1)
 // //#define TRAYNOPID 500
-
 
 #define MEC_BASE   1
 #define MEC_TRAY   2
