@@ -445,6 +445,9 @@ class Chassis{
       return ((potVal - potReq));
     }
 
+
+    //uncomment for TANK
+
     // void driveLR(int powerR, int powerL){//low level
     //   powerL = clamp(127, -127, yeet(powerL));
     //   powerR = clamp(127, -127, yeet(powerR));
@@ -506,37 +509,41 @@ class Chassis{
       driveArcade(speed, dirSkew);
     }
 
-    void smoothDriveToPoint(float X, float Y, float sharpness, bool isBackwards = false){
-      class Position goal(X, Y, 0);
-      float error = goal.distanceToPoint(odom.pos);
-      pid[CURVE].goal = 0;//goal is to have no distance between goal and current
-      //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(error), -0.916209) + 2.05938);//fancy
-      pid[CURVE].isRunning = false;
-      while(error > 3){//kinda bad... can be retuned n' stuff
-        error = goal.distanceToPoint(odom.pos);
-        //first compute angle to goal
-        if(!isBackwards) {//normal turn to angle and drive
-          float phi = normAngle(toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
-          //then drive at that angle
-          smoothDrive(7.5*error, phi, sharpness);
-        }
-        else {//drive to point, but backwards, so back reaches the point first.
-          float phi = normAngle(180 + toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
-          //then drive at that angle
-          smoothDrive(-7.5*error, phi, sharpness);
-        }
-      }
-      fwds(0, 0);
-      pid[CURVE].isRunning = false;
-      return;
-    }
 
+    //useless
+    // void smoothDriveToPoint(float X, float Y, float sharpness, bool isBackwards = false){
+    //   class Position goal(X, Y, 0);
+    //   float error = goal.distanceToPoint(odom.pos);
+    //   pids[CURVE].goal = 0;//goal is to have no distance between goal and current
+    //   //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(error), -0.916209) + 2.05938);//fancy
+    //   pids[CURVE].isRunning = false;
+    //   while(error > 3){//kinda bad... can be retuned n' stuff
+    //     error = goal.distanceToPoint(odom.pos);
+    //     //first compute angle to goal
+    //     if(!isBackwards) {//normal turn to angle and drive
+    //       float phi = normAngle(toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+    //       //then drive at that angle
+    //       smoothDrive(7.5*error, phi, sharpness);
+    //     }
+    //     else {//drive to point, but backwards, so back reaches the point first.
+    //       float phi = normAngle(180 + toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+    //       //then drive at that angle
+    //       smoothDrive(-7.5*error, phi, sharpness);
+    //     }
+    //   }
+    //   fwds(0, 0);
+    //   pids[CURVE].isRunning = false;
+    //   return;
+    // }
+
+
+    //big pog useful
     void smoothDriveToPointTIME(float X, float Y, float sharpness, float timevar, bool isBackwards = false){
       class Position goal(X, Y, 0);
       float error = goal.distanceToPoint(odom.pos);
-      pid[CURVE].goal = 0;//goal is to have no distance between goal and current
+      pids[CURVE].goal = 0;//goal is to have no distance between goal and current
       //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(error), -0.916209) + 2.05938);//fancy
-      pid[CURVE].isRunning = false;
+      pids[CURVE].isRunning = false;
       int t = 0;
       while(t < timevar){//kinda bad... can be retuned n' stuff
         error = goal.distanceToPoint(odom.pos);
@@ -554,8 +561,8 @@ class Chassis{
         t++;
         delay(1);
       }
-      fwds(0, 0);
-      pid[CURVE].isRunning = false;
+      fwdsUntil(0);
+      pids[CURVE].isRunning = false;
       return;
     }
 
@@ -577,6 +584,51 @@ class Chassis{
       fwdsDrive(0);
       pids[DRIVE].isRunning = false;
     }
+    void fwdsNEW(float amnt, int cap = 127){
+      const float initEncL = encL;
+      const float initEncR = encR;
+      int t = 0;
+      pids[DRIVE].goal = amnt;
+      pids[DRIVE].isRunning = true;
+      float currentDist = 0;
+      while(t < 2000){
+        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+      }
+      fwdsDrive(0);
+      pids[DRIVE].isRunning = false;
+    }
+    // void fwds(const float amnt, const int timeThresh, float cap = 127){//inches...ew //can TOTALLY use the odometry position vectors rather than encoders... smh
+    //   const int initEncRight = encoderR.get_value();
+    //   const int initEncLeft = encoderL.get_value();
+    //   pid[DRIVE].goal = amnt;
+    //   pid[DRIVE].isRunning = true;//TURN ON PID
+    //   //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(amnt), -0.916209) + 2.05938);FANCY
+    //   volatile float currentDist = 0.0;
+    //   while(abs(currentDist - pid[DRIVE].goal) > pid[DRIVE].thresh){
+    //     currentDist = avg(encoderDistInch(encoderL.get_value() - initEncLeft), encoderDistInch(encoderR.get_value()  - initEncRight));
+    //     fwdsDrive(clamp(cap, -cap, pid[DRIVE].compute(currentDist)));
+    //     delay(1);
+    //   }
+    //   int t = 0;
+    //   while(t < timeThresh){
+    //     currentDist = avg(encoderDistInch(encoderL.get_value() - initEncLeft), encoderDistInch(encoderR.get_value()  - initEncRight));
+    //     fwdsDrive(clamp(cap, -cap, pid[DRIVE].compute(currentDist)));
+    //     delay(1);
+    //     t++;
+    //   }
+    //   pid[DRIVE].isRunning = false;
+    //   //final check and correction
+    //   /*const int minSpeed = 30;//slow speed for robot's slight correction
+    //   while(abs(currentDist - pid[DRIVE].goal) > pid[DRIVE].thresh){
+    //   currentDist = avg(encoderDistInch(encoderL.get_value() - initEncLeft), encoderDistInch(encoderR.get_value()  - initEncRight));
+    //   fwdsDrive(clamp(cap, -cap, -sign(currentDist - pid[DRIVE].goal) * minSpeed));
+    //   }*/
+    //   fwdsDrive(0);
+    //   return;
+	  // }
 
   public:
     void moveToUntil(float amnt, int wait = 2000, int cap = 127){
