@@ -419,38 +419,39 @@ void statestest2() {
   rob.intake.move(127);
   rob.base.moveToUntil(-10, 10000, 63);
 }
+
 void statesnew() {
-rob.tray.setPIDState(ON);
-rob.lift.setPIDState(ON);
-rob.intake.setPIDState(OFF);
+  rob.tray.setPIDState(ON);
+  rob.lift.setPIDState(ON);
+  rob.intake.setPIDState(OFF);
 
-rob.base.setPID(DRIVE, 20, 0, 2.0);
-rob.intake.move(-127);
+  rob.base.setPID(DRIVE, 20, 0, 2.0);
+  rob.intake.move(-127);
 
-rob.base.moveToUntil(20, 1500, 100);
-rob.base.setPID(ANGLE, 8, 0, 2);
-rob.base.turnUntil(-50, 1500, 127);
-rob.base.moveToUntil(-27, 1300, 127);
-rob.base.turnUntil(50, 1500, 127);
-rob.base.moveToUntil(-5, 500, 127);
-rob.intake.move(-127);
-// rob.base.setPID(DRIVE, 20, 0, 2.0);
-rob.base.moveToUntil(34, 2500, 80);
-rob.base.moveToUntil(-12, 1200, 127);
-rob.intake.move(0);
-rob.base.setPID(ANGLE, 3, 0, 1);
-rob.tray.moveTo(1700);
-rob.intake.moveTo(rob.intake.getSensorVal() + 300);
-rob.base.turnUntil(120, 1800, 127);
-rob.tray.moveTo(2500);
-rob.base.setPID(DRIVE, 40, 0, 2.0);
-rob.base.moveToUntil(10, 800, 127);
-rob.intake.setPIDState(OFF);
-rob.intake.move(63);
-// rob.tray.moveToUntil(3000, 700, 127);
-rob.tray.moveToUntil(4600, 1000, 63);
-rob.intake.move(127);
-rob.base.moveToUntil(-10, 10000, 63);
+  rob.base.moveToUntil(20, 1500, 100);
+  rob.base.setPID(ANGLE, 8, 0, 2);
+  rob.base.turnUntil(-50, 1500, 127);
+  rob.base.moveToUntil(-27, 1300, 127);
+  rob.base.turnUntil(50, 1500, 127);
+  rob.base.moveToUntil(-5, 500, 127);
+  rob.intake.move(-127);
+  // rob.base.setPID(DRIVE, 20, 0, 2.0);
+  rob.base.moveToUntil(34, 2500, 80);
+  rob.base.moveToUntil(-12, 1200, 127);
+  rob.intake.move(0);
+  rob.base.setPID(ANGLE, 3, 0, 1);
+  rob.tray.moveTo(1700);
+  rob.intake.moveTo(rob.intake.getSensorVal() + 300);
+  rob.base.turnUntil(120, 1800, 127);
+  rob.tray.moveTo(2500);
+  rob.base.setPID(DRIVE, 40, 0, 2.0);
+  rob.base.moveToUntil(10, 800, 127);
+  rob.intake.setPIDState(OFF);
+  rob.intake.move(63);
+  // rob.tray.moveToUntil(3000, 700, 127);
+  rob.tray.moveToUntil(4600, 1000, 63);
+  rob.intake.move(127);
+  rob.base.moveToUntil(-10, 10000, 63);
 }
 
 void testturn() {
@@ -462,14 +463,21 @@ void testtray() {
   rob.tray.setPIDState(OFF);
   rob.tray.moveTo(1700);
 }
+
+void testsmooth() {
+  rob.base.smoothDriveToPointTIME(13, 20, 0.6, 10000);
+}
+
+
 void autonomous() {
     init();
     // test();
     // states();
     // testturn();
     // testtray();
-    statestest2();
+    // statestest2();
     // bigAuton();
     // CV2(-1); //blue
     // CV2(1); //red
+    testsmooth();
 }
