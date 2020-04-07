@@ -40,7 +40,8 @@ public:
 		{ Motor(RFront, true), Motor(LFront), Motor(LBack), Motor(RBack, true) }, //motors
 		{ PIDcontroller(40, 0.0, 2.0, 0.5, 10, true, false), //forward back
 		  PIDcontroller(2, 0.0, 0.5, 5.0, 10, true, false), //turnuntil angle, if too slow, increase kp, lower = slower power
-		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false) }, //opdrive PID
+		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false),
+			PIDcontroller(2.5, 0.0, 0.0, 1.0, 10, false, false) }, //opdrive PID
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	)
 	// trayToggle(

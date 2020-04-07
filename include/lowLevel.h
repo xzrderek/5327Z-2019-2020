@@ -506,6 +506,59 @@ class Chassis{
       driveArcade(speed, dirSkew);
     }
 
+    void smoothDriveToPoint(float X, float Y, float sharpness, bool isBackwards = false){
+      class Position goal(X, Y, 0);
+      float error = goal.distanceToPoint(odom.pos);
+      pid[CURVE].goal = 0;//goal is to have no distance between goal and current
+      //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(error), -0.916209) + 2.05938);//fancy
+      pid[CURVE].isRunning = false;
+      while(error > 3){//kinda bad... can be retuned n' stuff
+        error = goal.distanceToPoint(odom.pos);
+        //first compute angle to goal
+        if(!isBackwards) {//normal turn to angle and drive
+          float phi = normAngle(toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+          //then drive at that angle
+          smoothDrive(7.5*error, phi, sharpness);
+        }
+        else {//drive to point, but backwards, so back reaches the point first.
+          float phi = normAngle(180 + toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+          //then drive at that angle
+          smoothDrive(-7.5*error, phi, sharpness);
+        }
+      }
+      fwds(0, 0);
+      pid[CURVE].isRunning = false;
+      return;
+    }
+
+    void smoothDriveToPointTIME(float X, float Y, float sharpness, float timevar, bool isBackwards = false){
+      class Position goal(X, Y, 0);
+      float error = goal.distanceToPoint(odom.pos);
+      pid[CURVE].goal = 0;//goal is to have no distance between goal and current
+      //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(error), -0.916209) + 2.05938);//fancy
+      pid[CURVE].isRunning = false;
+      int t = 0;
+      while(t < timevar){//kinda bad... can be retuned n' stuff
+        error = goal.distanceToPoint(odom.pos);
+        //first compute angle to goal
+        if(!isBackwards) {//normal turn to angle and drive
+          float phi = normAngle(toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+          //then drive at that angle
+          smoothDrive(7.5*error, phi, sharpness);
+        }
+        else {//drive to point, but backwards, so back reaches the point first.
+          float phi = normAngle(180 + toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
+          //then drive at that angle
+          smoothDrive(-7.5*error, phi, sharpness);
+        }
+        t++;
+        delay(1);
+      }
+      fwds(0, 0);
+      pid[CURVE].isRunning = false;
+      return;
+    }
+
   private:
     //higher levels
     void fwdsUntil(float amnt, int cap = 127){
