@@ -465,7 +465,7 @@ void testtray() {
 }
 
 void testsmooth() {
-  rob.base.smoothDriveToPointTIME(13, 20, 0.6, 10000);
+  rob.base.smoothDriveToPointTIME(20, 20, 0.2, 2000);
 }
 
 

@@ -38,10 +38,10 @@ public:
 	),
 	base(
 		{ Motor(RFront, true), Motor(LFront), Motor(LBack), Motor(RBack, true) }, //motors
-		{ PIDcontroller(40, 0.0, 2.0, 0.5, 10, true, false), //forward back
-		  PIDcontroller(2, 0.0, 0.5, 5.0, 10, true, false), //turnuntil angle, if too slow, increase kp, lower = slower power
-		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false),
-			PIDcontroller(2.5, 0.0, 0.0, 1.0, 10, false, false) }, //opdrive PID
+		{ PIDcontroller(.1, 0.0, 0.05, 1.75, 10, true, false), //forward back
+		  PIDcontroller(.1, 0.0, 0.5, 2.0,  10, false, false), //turnuntil angle, if too slow, increase kp, lower = slower power
+		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false), //op drive
+			PIDcontroller(.1, 0.0, 0.1, 1.0, 10, false, false) }, //curves
 		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
 	)
 	// trayToggle(
@@ -79,6 +79,9 @@ public:
 		intake.reset();
 		lift.reset();
 		base.reset();
+		base.odom.pos.X = 0;
+		base.odom.pos.Y = 0;
+		base.odom.pos.heading = 90;
 	}
 	// void indexerAdvance(int amntTicks = 100){//bring indexer ball up once (given number of encoder ticks)
 	// 	indexer.moveAmnt(amntTicks, 10);
