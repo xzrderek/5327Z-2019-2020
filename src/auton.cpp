@@ -470,14 +470,9 @@ void testtray()
   rob.tray.moveTo(1700);
 }
 
-<<<<<<< HEAD
 void testsmooth()
 {
   rob.base.smoothDriveToPointTIME(13, 20, 0.6, 10000);
-=======
-void testsmooth() {
-  rob.base.smoothDriveToPointTIME(20, 20, 0.2, 2000);
->>>>>>> 41f13847a76277c58473222c4877ca78d7aa60eb
 }
 
 void autonomous()
