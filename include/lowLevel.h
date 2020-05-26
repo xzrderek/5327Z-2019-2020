@@ -612,11 +612,33 @@ public:
         //then drive at that angle
         smoothDrive(7.5 * error, phi, sharpness);
       }
+<<<<<<< HEAD
       else
       { //drive to point, but backwards, so back reaches the point first.
         float phi = normAngle(180 + toDeg(atan2((goal.Y - odom.pos.Y), (goal.X - odom.pos.X))));
         //then drive at that angle
         smoothDrive(-7.5 * error, phi, sharpness);
+=======
+      fwds(0, 0);
+      pids[CURVE].isRunning = false;
+      return;
+    }
+
+  private:
+    //higher levels
+    void fwdsUntil(float amnt, int cap = 127){
+      float initX = odom.pos.X;
+      float initY = odom.pos.Y;
+      int t = 0;
+      pids[DRIVE].setGoal(amnt);
+      pids[DRIVE].isRunning = true;
+      float currentDist = 0;
+      while(t < 2000){
+        currentDist = sqrt(sqr(odom.pos.X - initX) + sqr(odom.pos.Y - initY));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+>>>>>>> 41f13847a76277c58473222c4877ca78d7aa60eb
       }
       t++;
       delay(1);
@@ -643,6 +665,7 @@ private:
       delay(1);
       t++;
     }
+<<<<<<< HEAD
     fwdsDrive(0);
     pids[DRIVE].isRunning = false;
   }
@@ -660,6 +683,55 @@ private:
       fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
       delay(1);
       t++;
+=======
+
+    void fwds(const float amnt, const int timeThresh, float cap = 127){//inches...ew //can TOTALLY use the odometry position vectors rather than encoders... smh
+      float initX = odom.pos.X;
+      float initY = odom.pos.Y;
+      pids[DRIVE].goal = amnt;
+      pids[DRIVE].isRunning = true;//TURN ON PID
+      //pid[DRIVE].kP = limUpTo(20, 28.0449 * pow(abs(amnt), -0.916209) + 2.05938);FANCY
+      volatile float currentDist = 0.0;
+      while(abs(currentDist - pids[DRIVE].goal) > pids[DRIVE].thresh){
+        currentDist = sqrt(sqr(odom.pos.X - initX) + sqr(odom.pos.Y - initY));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+      }
+      int t = 0;
+      while(t < timeThresh){
+        currentDist = sqrt(sqr(odom.pos.X - initX) + sqr(odom.pos.Y - initY));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+      }
+      pids[DRIVE].isRunning = false;
+      //final check and correction
+      /*const int minSpeed = 30;//slow speed for robot's slight correction
+      while(abs(currentDist - pid[DRIVE].goal) > pid[DRIVE].thresh){
+      currentDist = avg(encoderDistInch(encoderL.get_value() - initEncLeft), encoderDistInch(encoderR.get_value()  - initEncRight));
+      fwdsDrive(clamp(cap, -cap, -sign(currentDist - pid[DRIVE].goal) * minSpeed));
+      }*/
+      fwdsDrive(0);
+      return;
+	  }
+
+  public:
+    void moveToUntil(float amnt, int wait = 2000, int cap = 127){
+      const float initEncL = encL;
+      const float initEncR = encR;
+      int t = 0;
+      pids[DRIVE].setGoal(amnt);
+      pids[DRIVE].isRunning = true;
+      float currentDist = 0;
+      while(t < wait){
+        currentDist = avg(encoderDistInch(encL - initEncL), encoderDistInch(encR - initEncR));
+        fwdsDrive(clamp(cap, -cap, pids[DRIVE].compute(currentDist)));
+        delay(1);
+        t++;
+      }
+      fwdsDrive(0);
+      pids[DRIVE].isRunning = false;
+>>>>>>> 41f13847a76277c58473222c4877ca78d7aa60eb
     }
     fwdsDrive(0);
     pids[DRIVE].isRunning = false;

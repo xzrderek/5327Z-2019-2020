@@ -19,6 +19,7 @@ class Robot
 {
 public:
 	//CONSTRUCTOR:
+<<<<<<< HEAD
 	Robot() : //mechanisms
 			  tray(
 				  MEC_TRAY,
@@ -46,6 +47,36 @@ public:
 				   PIDcontroller(2.5, 0.0, 0.0, 1.0, 10, false, false)}, //opdrive PID
 				  Odometry(Position(0, 0, 0), Position(0, 0, 0))		 //actual position, tracker mech's position
 			  )
+=======
+	Robot() :
+	//mechanisms
+	tray(
+		MEC_TRAY,
+		{ Motor(TRAY, true) }, //motors
+		{},//no sensors for indexer, thus use indexer motor
+		PIDcontroller(0.5, 0.0, 0.1, 10,  10, true, false)//PID
+	),
+	intake(
+		MEC_INTAKE,
+		{ Motor(INTAKE1), Motor(INTAKE2, true) }, //motors
+		{},//no sensors for intake, thus use indexer motor
+		PIDcontroller(1.0, 0.0, 2.0, 10,  10, true, false)//PID
+	),
+	lift(
+		MEC_LIFT,
+		{ Motor(LIFT)}, //motors
+		{},//no sensors for lift, thus use indexer motor
+		PIDcontroller(2.0, 0.0, 2.0, 10,  10, true, false)//PID
+	),
+	base(
+		{ Motor(RFront, true), Motor(LFront), Motor(LBack), Motor(RBack, true) }, //motors
+		{ PIDcontroller(.1, 0.0, 0.05, 1.75, 10, true, false), //forward back
+		  PIDcontroller(.1, 0.0, 0.5, 2.0,  10, false, false), //turnuntil angle, if too slow, increase kp, lower = slower power
+		  PIDcontroller(0.1, 0.0, 0, 0.5, 10, true, false), //op drive
+			PIDcontroller(.1, 0.0, 0.1, 1.0, 10, false, false) }, //curves
+		Odometry(Position(0, 0, 0), Position(0, 0, 0)) //actual position, tracker mech's position
+	)
+>>>>>>> 41f13847a76277c58473222c4877ca78d7aa60eb
 	// trayToggle(
 	// 	MEC_TRAY,
 	// 	{ Motor(TRAY) }, //motors
@@ -82,6 +113,9 @@ public:
 		intake.reset();
 		lift.reset();
 		base.reset();
+		base.odom.pos.X = 0;
+		base.odom.pos.Y = 0;
+		base.odom.pos.heading = 90;
 	}
 	// void indexerAdvance(int amntTicks = 100){//bring indexer ball up once (given number of encoder ticks)
 	// 	indexer.moveAmnt(amntTicks, 10);
